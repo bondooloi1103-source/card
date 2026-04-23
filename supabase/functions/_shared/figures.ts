@@ -28,8 +28,8 @@ export const FIGURES: SharedFigure[] = [
   {
     "fig_id": 4,
     "cat": "khans",
-    "quote": null,
-    "qattr": null
+    "quote": "Гарын хурган адилгүй байдагтай адил, Тэнгэр хүмүүст янз бүрийн зам өгсөн байна.",
+    "qattr": "Мөнх Хаан"
   },
   {
     "fig_id": 5,
