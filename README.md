@@ -38,6 +38,8 @@ supabase functions deploy list-codes
 supabase functions deploy delete-code
 supabase functions deploy game-create-session
 supabase functions deploy game-submit-result
+supabase functions deploy game-live-snapshot
+supabase functions deploy game-live-event
 ```
 
 4. Copy `.env.example` → `.env` and fill in `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` from your project's Settings → API page.
@@ -68,3 +70,5 @@ Each `DO $$ ... $$` block raises on policy violations; no output means pass.
 - Implementation plan: [`docs/superpowers/plans/2026-04-23-supabase-migration.md`](docs/superpowers/plans/2026-04-23-supabase-migration.md)
 - Quote game multiplayer spec: [`docs/superpowers/specs/2026-04-23-quote-game-multiplayer-design.md`](docs/superpowers/specs/2026-04-23-quote-game-multiplayer-design.md)
 - Quote game multiplayer plan (Phase 0+1): [`docs/superpowers/plans/2026-04-23-quote-game-multiplayer-phase-0-1.md`](docs/superpowers/plans/2026-04-23-quote-game-multiplayer-phase-0-1.md)
+- Quote game live rooms spec (Phase 2): [`docs/superpowers/specs/2026-04-24-quote-game-live-rooms-design.md`](docs/superpowers/specs/2026-04-24-quote-game-live-rooms-design.md)
+- Quote game live rooms plan (Phase 2): [`docs/superpowers/plans/2026-04-24-quote-game-live-rooms-phase-2.md`](docs/superpowers/plans/2026-04-24-quote-game-live-rooms-phase-2.md)

@@ -3205,3 +3205,43 @@ Plan complete. Two execution options:
 2. **Inline Execution** — Use superpowers:executing-plans for batch execution with checkpoints.
 
 Which approach?
+
+---
+
+## Execution log
+
+### 2026-04-24 — Phase 2 shipped
+
+**Outcome:** all 26 tasks landed on feature branch `feat/quote-game-live-rooms-phase-2`. 69 vitest tests green; `npx vite build` exits clean. 2 new migrations applied, 2 new edge functions deployed (ACTIVE version 1). Ready to merge to master.
+
+**Route adjustment (noted at execution start):** routes use 6-char join_code (`/games/quotes/live/:code`) but internal edge-function APIs want session_id (UUID). Rather than a separate lookup endpoint, `game-live-snapshot` accepts either via body or query. Hook and client API updated accordingly.
+
+**Deviations from the plan (intentional):**
+
+1. **Column-level REVOKE required a two-step fix.** My migration's `revoke select (current_round_answer) on game_participants from authenticated, anon` had no effect — Supabase's default table-level `GRANT SELECT` covers every column. Added a corrective migration (`20260424010100_live_rooms_column_privs.sql`) that revokes the table grant and regrants only the safe columns. Defense in depth verified: the RLS smoke block for "authenticated cannot select current_round_answer directly" now passes.
+
+2. **Edge-function branches batched into a single commit.** Plan had 7 per-branch tasks (11–17) each with its own commit + redeploy. Since no real end-to-end test is possible inline (needs a live JWT), the incremental redeploys provided no verification value. Wrote the whole function in one file, deployed once, committed once. Plan-task traceability lives in the plan's coverage map.
+
+3. **Home.jsx entry button deferred.** Plan Task 23 bundled routes + a Home link. Routes landed; Home link did not. Rooms are reachable via direct URL; the rematch-ready broadcast auto-navigates players between rooms. Known follow-up.
+
+4. **Realtime channel *subscribe* auth not enforced.** Broadcast sends are restricted (only service role publishes), but the plan did not wire up Supabase Realtime RLS to gate *subscribe*. Anyone with the join_code could listen and see `correct/ms` flags for others. Acceptable for V1 since those flags are minimal metadata; proper subscribe-side auth is a follow-up when Supabase's private-channel RLS integration is used.
+
+5. **RoundPlayer revealed state in solo game.** In the solo-game refactor (Task 9), I pass `revealed={picked !== null}` and `correctFigId={q.figId}` so the first-pick immediately reveals correctness (same as before extraction). Live rooms drive `revealed` from the `reveal` broadcast.
+
+**Manual end-to-end test (Task 25):** not run in this session — requires two real browsers + two authenticated users + a live JWT. Test steps documented for the user:
+
+1. `npm run dev` locally.
+2. Browser A: sign in, navigate to `/games/quotes/live/new`, create a 5-question room, 10s timer.
+3. Note the join code. Browser B (different user): navigate to `/games/quotes/live/<CODE>`.
+4. Lobby should show both players; A is host.
+5. A clicks Start. Both browsers render 3-2-1 countdown, then first question.
+6. Answer in both before timer. Reveal should fire within ~2s of both answers.
+7. Complete all 5 rounds. Results view; either player clicks Rematch → both navigate to new room (rematcher becomes host).
+
+**Known follow-ups for later plans:**
+- Realtime subscribe-side auth via Supabase's private channels.
+- Home.jsx "Live room" entry button.
+- Spectator mode (Phase 2.5?).
+- Per-player achievements / medals (Phase 3).
+- Tournament × live-room combo.
+- Automate `_shared/figures.ts` regeneration (still hand-run from `figuresData.js`).
