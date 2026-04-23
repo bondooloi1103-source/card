@@ -18,6 +18,7 @@ vi.mock('@/lib/supabase', () => ({
   supabase: {
     channel: vi.fn(() => fakeChannel),
     removeChannel: vi.fn(),
+    realtime: { setAuth: vi.fn().mockResolvedValue(undefined) },
   },
 }));
 
@@ -37,6 +38,17 @@ describe('useLiveRoom', () => {
     const { result } = renderHook(() => useLiveRoom('s1'));
     await waitFor(() => expect(result.current.loading).toBe(false));
     expect(result.current.session?.id).toBe('s1');
+  });
+
+  it('opens a private channel and authenticates Realtime', async () => {
+    const { supabase } = await import('@/lib/supabase');
+    const { result } = renderHook(() => useLiveRoom('s1'));
+    await waitFor(() => expect(result.current.loading).toBe(false));
+    expect(supabase.realtime.setAuth).toHaveBeenCalled();
+    expect(supabase.channel).toHaveBeenCalledWith(
+      'game:session:s1',
+      { config: { private: true } },
+    );
   });
 
   it('applies lobby_update broadcasts to participants', async () => {

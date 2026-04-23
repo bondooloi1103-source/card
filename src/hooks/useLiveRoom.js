@@ -33,7 +33,11 @@ export function useLiveRoom(sessionIdOrKeys) {
         }));
 
         const sid = snap.session.id;
-        const channel = supabase.channel(`game:session:${sid}`);
+        await supabase.realtime.setAuth();
+        if (cancelled) return;
+        const channel = supabase.channel(`game:session:${sid}`, {
+          config: { private: true },
+        });
         channelRef.current = channel;
 
         channel.on('broadcast', { event: '*' }, (msg) => {

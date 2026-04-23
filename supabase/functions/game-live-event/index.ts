@@ -6,7 +6,7 @@ import { FIGURES } from '../_shared/figures.ts';
 const PRESENCE_CHANNEL = (sid: string) => `game:session:${sid}`;
 
 async function broadcast(admin: SupabaseClient, sessionId: string, event: string, payload: unknown) {
-  const ch = admin.channel(PRESENCE_CHANNEL(sessionId));
+  const ch = admin.channel(PRESENCE_CHANNEL(sessionId), { config: { private: true } });
   await ch.send({ type: 'broadcast', event, payload });
   await admin.removeChannel(ch);
 }

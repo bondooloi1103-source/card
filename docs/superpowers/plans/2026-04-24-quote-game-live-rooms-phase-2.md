@@ -3239,8 +3239,8 @@ Which approach?
 7. Complete all 5 rounds. Results view; either player clicks Rematch → both navigate to new room (rematcher becomes host).
 
 **Known follow-ups for later plans:**
-- Realtime subscribe-side auth via Supabase's private channels.
-- Home.jsx "Live room" entry button.
+- ~~Realtime subscribe-side auth via Supabase's private channels.~~ Shipped 2026-04-24 in `20260424020000_live_rooms_realtime_auth` — client uses `{ config: { private: true } }` + `realtime.setAuth()`, edge function publish is marked private (service role bypasses RLS on write), and a `realtime.messages` SELECT policy gates subscribes on `auth.uid()` being a participant of the session embedded in the topic.
+- ~~Home.jsx "Live room" entry button.~~ Shipped 2026-04-24 in commit `3a824ff` — new `/games/quotes/live` hub + Engagements 2→4 cards + Games Navbar anchor.
 - Spectator mode (Phase 2.5?).
 - Per-player achievements / medals (Phase 3).
 - Tournament × live-room combo.
