@@ -17,6 +17,7 @@ import LiveRoomNew from '@/pages/LiveRoomNew';
 import LiveRoomEntry from '@/pages/LiveRoomEntry';
 import LiveRoom from '@/pages/LiveRoom';
 import StoryTour from '@/pages/StoryTour';
+import ScanChat from '@/pages/ScanChat';
 import DuelIntro from '@/pages/DuelIntro';
 import DuelSummary from '@/pages/DuelSummary';
 import Leaderboard from '@/pages/Leaderboard';
@@ -51,6 +52,7 @@ const AuthenticatedApp = () => {
     <Routes>
       <Route path="/" element={<Landing />} />
       <Route path="/otp" element={<OtpLogin />} />
+      <Route path="/c/:figId" element={<ScanChat />} />
       <Route path="/app" element={<OtpGate><Home /></OtpGate>} />
       <Route path="/figure/:figId" element={<OtpGate><FigureDetail /></OtpGate>} />
       <Route path="/collection" element={<OtpGate><MyCollection /></OtpGate>} />
