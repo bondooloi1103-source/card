@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { tryAnswer } from '@/lib/figureResponder';
+import { supabase } from '@/lib/supabase';
 
 const MAX_TURNS_KEPT = 20;
 const MAX_TURNS_SENT_TO_LLM = 8;
@@ -95,18 +96,34 @@ export function useFigureChat(figure) {
       return;
     }
 
-    // Tier 2: edge function ask-figure. Wired in Task 8; for now, a stub that
-    // still renders in-character fallback so the UI flow is complete.
-    await new Promise((r) => setTimeout(r, 400));
-    pushMessage({
-      role: 'ai',
-      text: UPSTREAM_FALLBACK[lang],
-      lang,
-      source: 'fallback',
-      ts: Date.now(),
-    });
+    // Tier 2: edge function ask-figure.
+    try {
+      const history = messages.slice(-8).map((m) => ({ role: m.role, text: m.text }));
+      const { data, error } = await supabase.functions.invoke('ask-figure', {
+        body: {
+          figure: {
+            name: figure.name,
+            yrs: figure.yrs,
+            role: figure.role,
+            bio: figure.bio,
+            achs: figure.achs,
+            fact: figure.fact,
+            quote: figure.quote,
+            qattr: figure.qattr,
+          },
+          question: userMsg.text,
+          lang,
+          history,
+        },
+      });
+      const text = (!error && data?.ok && data.reply) ? data.reply : UPSTREAM_FALLBACK[lang];
+      pushMessage({ role: 'ai', text, lang, source: data?.source ?? 'error', ts: Date.now() });
+    } catch (err) {
+      console.error('ask-figure invoke failed', err);
+      pushMessage({ role: 'ai', text: UPSTREAM_FALLBACK[lang], lang, source: 'exception', ts: Date.now() });
+    }
     setBusy(false);
-  }, [figure, lang, busy, pushMessage]);
+  }, [figure, lang, busy, pushMessage, messages]);
 
   const clearChat = useCallback(() => {
     sessionStorage.removeItem(storageKey(figure.fig_id));
