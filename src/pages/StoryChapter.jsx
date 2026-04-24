@@ -5,6 +5,8 @@ import { useLang, storyText } from '@/lib/i18n';
 import { ERAS, ERA_KEYS } from '@/lib/figuresData';
 import { buildChapterPlaylist } from '@/lib/storyPlaylist';
 import { useNarration } from '@/hooks/useNarration';
+import { useVoices } from '@/hooks/useVoices';
+import { supabase } from '@/lib/supabase';
 import StoryStage from '@/components/story/StoryStage';
 import StoryControls from '@/components/story/StoryControls';
 import StoryEnding from '@/components/story/StoryEnding';
@@ -29,6 +31,7 @@ export default function StoryChapter() {
     [chapter],
   );
   const eraDef = ERAS[chapter] || {};
+  const { voiceIdFor } = useVoices(lang);
 
   const initialIdx = useMemo(() => {
     const q = parseInt(params.get('s') ?? '', 10);
@@ -73,9 +76,47 @@ export default function StoryChapter() {
 
   const advance = useCallback(() => setSlideIdx((i) => i + 1), []);
 
+  const slideVoiceId = useMemo(() => {
+    if (!slide || slide.kind !== 'figure') return null;
+    return voiceIdFor(slide.figure.fig_id);
+  }, [slide, voiceIdFor]);
+
   const { status, progress, charIndex, play, pause, stop } = useNarration({
-    text: narrationText, lang, autoPlay: true, onDone: advance,
+    text: narrationText,
+    lang,
+    voiceId: slideVoiceId,
+    useSpeak: true,
+    autoPlay: true,
+    onDone: advance,
   });
+
+  // Background pre-fetch: warm the speak cache for upcoming slides.
+  useEffect(() => {
+    if (!playlist.length || slideIdx >= playlist.length - 1) return;
+    if (typeof navigator !== 'undefined' && navigator.connection?.saveData) return;
+    const upcoming = playlist.slice(slideIdx + 1);
+    const CONCURRENCY = 3;
+    let cancelled = false;
+    let cursor = 0;
+    async function runOne() {
+      while (!cancelled && cursor < upcoming.length) {
+        const i = cursor++;
+        const s = upcoming[i];
+        const text = s.kind === 'figure'
+          ? storyText(s.figure, lang)
+          : s.kind === 'intro'
+            ? `${eraDef.label}. ${lang === 'en' ? (eraDef.years_en || eraDef.years) : eraDef.years}. ${lang === 'en' ? (eraDef.intro_en || eraDef.intro) : eraDef.intro ?? ''}`
+            : (lang === 'en' ? `Chapter ${eraDef.roman} complete.` : `Бүлэг ${eraDef.roman} дуусав.`);
+        const vid = s.kind === 'figure' ? voiceIdFor(s.figure.fig_id) : null;
+        const body = { text, lang };
+        if (vid) body.voice_id = vid;
+        try { await supabase.functions.invoke('speak', { body }); } catch { /* ignore */ }
+      }
+    }
+    const workers = Array.from({ length: CONCURRENCY }, () => runOne());
+    Promise.allSettled(workers);
+    return () => { cancelled = true; };
+  }, [playlist, slideIdx, lang, voiceIdFor, eraDef]);
 
   const goPrev = useCallback(() => setSlideIdx((i) => Math.max(0, i - 1)), []);
   const goNext = useCallback(() => setSlideIdx((i) => i + 1), []);

@@ -7,8 +7,18 @@ vi.mock('@/hooks/useNarration', () => ({
   useNarration: vi.fn(() => ({
     status: 'idle', progress: 0, charIndex: 0,
     play: vi.fn(), pause: vi.fn(), stop: vi.fn(),
-    audioProps: {}, mode: 'tts',
+    audioProps: {}, mode: 'tts', source: 'tts',
   })),
+}));
+
+vi.mock('@/hooks/useVoices', () => ({
+  useVoices: vi.fn(() => ({ isLoading: false, voiceIdFor: () => null })),
+}));
+
+vi.mock('@/lib/supabase', () => ({
+  supabase: {
+    functions: { invoke: vi.fn().mockResolvedValue({ data: null, error: null }) },
+  },
 }));
 
 vi.mock('@/components/story/StoryMapPanel', () => ({
