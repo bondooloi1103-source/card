@@ -59,7 +59,11 @@ Deno.serve(async (req) => {
     .eq('session_id', sessionId)
     .eq('user_id', userId)
     .maybeSingle();
-  if (!part && session.host_user_id !== userId) {
+  // Allow lookup-by-code for open sessions so a user pasting a code can see
+  // the lobby before their auto-join completes. In-progress and finished
+  // sessions still enforce the participant check.
+  const peekingOpenLobby = joinCode && session.status === 'open';
+  if (!part && session.host_user_id !== userId && !peekingOpenLobby) {
     return json({ ok: false, reason: 'forbidden' }, 403);
   }
 

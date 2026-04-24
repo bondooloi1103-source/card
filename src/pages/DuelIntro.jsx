@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { ArrowLeft } from 'lucide-react';
 import { useLang } from '@/lib/i18n';
 import { useAuth } from '@/lib/AuthContext';
 import { fetchSession, fetchSessionResults } from '@/lib/gameApi';
@@ -95,11 +96,21 @@ export default function DuelIntro() {
 }
 
 function IntroShell({ children }) {
+  const navigate = useNavigate();
+  const { lang } = useLang();
   return (
-    <div className="min-h-screen bg-ink contour-bg flex items-center justify-center px-6 text-center">
-      <div className="max-w-xl space-y-5">
-        <Fleuron size={48} className="mx-auto opacity-80" />
-        {children}
+    <div className="min-h-screen bg-ink contour-bg px-6 py-6">
+      <button
+        onClick={() => navigate(-1)}
+        className="flex items-center gap-2 font-meta text-[10px] tracking-[0.3em] uppercase text-brass/75 hover:text-ivory"
+      >
+        <ArrowLeft className="w-3.5 h-3.5" /> {lang === 'en' ? 'Back' : 'Буцах'}
+      </button>
+      <div className="flex items-center justify-center min-h-[calc(100vh-4rem)]">
+        <div className="max-w-xl space-y-5 text-center">
+          <Fleuron size={48} className="mx-auto opacity-80" />
+          {children}
+        </div>
       </div>
     </div>
   );

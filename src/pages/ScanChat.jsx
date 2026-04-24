@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import { Send, Volume2, X } from 'lucide-react';
+import { useParams, Link, useNavigate } from 'react-router-dom';
+import { Send, Volume2, X, ArrowLeft } from 'lucide-react';
 import { FIGURES } from '@/lib/figuresData';
 import { useFigureChat } from '@/hooks/useFigureChat';
 import ScanNotFound from '@/components/ScanNotFound';
@@ -21,6 +21,7 @@ export default function ScanChat() {
 }
 
 function ScanChatInner({ figure }) {
+  const navigate = useNavigate();
   const { messages, lang, busy, send, switchLang } = useFigureChat(figure);
   const [input, setInput] = useState('');
   const [bannerDismissed, setBannerDismissed] = useState(false);
@@ -39,6 +40,13 @@ function ScanChatInner({ figure }) {
   return (
     <div className="min-h-screen flex flex-col bg-ink">
       <header className="flex-shrink-0 px-4 py-3 flex items-center gap-3 border-b border-brass/25 bg-ink/90">
+        <button
+          onClick={() => (window.history.length > 1 ? navigate(-1) : navigate('/'))}
+          className="w-8 h-8 flex items-center justify-center text-brass/80 hover:text-ivory transition-colors"
+          aria-label="Back"
+        >
+          <ArrowLeft className="w-4 h-4" />
+        </button>
         <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 border border-brass bg-brass/10">
           <span className="text-xl">{figure.ico}</span>
         </div>
