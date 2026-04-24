@@ -1,20 +1,85 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { supabase } from '@/lib/supabase';
+
+async function fetchSpokenUrl({ text, lang, voiceId }) {
+  const body = { text, lang };
+  if (voiceId) body.voice_id = voiceId;
+  const { data, error } = await supabase.functions.invoke('speak', { body });
+  if (error) return { url: null, source: 'fallback' };
+  return {
+    url: data?.url ?? null,
+    source: data?.source ?? 'fallback',
+  };
+}
 
 /**
- * Narration engine. Plays either a pre-recorded audio URL OR browser
- * SpeechSynthesis on `text`. Exposes the same interface either way.
+ * Narration engine.
+ * Props:
+ *   text        string to narrate
+ *   audioUrl    optional pre-resolved audio URL (skips speak)
+ *   lang        'mn' | 'en' | 'cn'
+ *   voiceId     optional ElevenLabs voice id (per-figure character voice)
+ *   useSpeak    when true, call the `speak` edge function before falling back to TTS
+ *   autoPlay    begin on mount / change
+ *   onDone      called when narration finishes
  */
-export function useNarration({ text, audioUrl, lang = 'mn', autoPlay = false, onDone } = {}) {
+export function useNarration({
+  text,
+  audioUrl,
+  lang = 'mn',
+  voiceId,
+  useSpeak = false,
+  autoPlay = false,
+  onDone,
+} = {}) {
   const ttsSupported = typeof window !== 'undefined' && 'speechSynthesis' in window;
   const [status, setStatus] = useState('idle');
   const [progress, setProgress] = useState(0);
   const [charIndex, setCharIndex] = useState(0);
+  const [resolvedUrl, setResolvedUrl] = useState(audioUrl ?? null);
+  const [source, setSource] = useState(audioUrl ? 'provided' : 'idle');
   const audioRef = useRef(null);
   const utterRef = useRef(null);
   const onDoneRef = useRef(onDone);
   onDoneRef.current = onDone;
 
-  const mode = audioUrl ? 'audio' : 'tts';
+  // Resolve audio URL through `speak` edge function with cascade fallback.
+  useEffect(() => {
+    if (audioUrl) {
+      setResolvedUrl(audioUrl);
+      setSource('provided');
+      return;
+    }
+    if (!useSpeak || !text) {
+      setResolvedUrl(null);
+      setSource('tts');
+      return;
+    }
+    let cancelled = false;
+    (async () => {
+      const first = await fetchSpokenUrl({ text, lang, voiceId });
+      if (cancelled) return;
+      if (first.url) {
+        setResolvedUrl(first.url);
+        setSource(first.source);
+        return;
+      }
+      if (voiceId) {
+        const second = await fetchSpokenUrl({ text, lang });
+        if (cancelled) return;
+        if (second.url) {
+          setResolvedUrl(second.url);
+          setSource(second.source);
+          return;
+        }
+      }
+      setResolvedUrl(null);
+      setSource('tts');
+    })();
+    return () => { cancelled = true; };
+  }, [text, audioUrl, lang, voiceId, useSpeak]);
+
+  const mode = resolvedUrl ? 'audio' : 'tts';
 
   const pickVoice = useCallback(() => {
     if (!ttsSupported) return null;
@@ -50,17 +115,12 @@ export function useNarration({ text, audioUrl, lang = 'mn', autoPlay = false, on
     }
     window.speechSynthesis.cancel();
     const u = new window.SpeechSynthesisUtterance(text);
-    const voice = pickVoice();
-    if (voice) u.voice = voice;
+    const v = pickVoice();
+    if (v) u.voice = v;
     u.lang = lang === 'en' ? 'en-US' : 'mn-MN';
     u.rate = 0.96;
     u.onstart = () => setStatus('playing');
-    u.onend = () => {
-      setStatus('done');
-      setProgress(1);
-      utterRef.current = null;
-      onDoneRef.current?.();
-    };
+    u.onend = () => { setStatus('done'); setProgress(1); utterRef.current = null; onDoneRef.current?.(); };
     u.onerror = () => { setStatus('idle'); utterRef.current = null; };
     u.onboundary = (ev) => {
       if (typeof ev.charIndex === 'number' && text.length > 0) {
@@ -83,7 +143,7 @@ export function useNarration({ text, audioUrl, lang = 'mn', autoPlay = false, on
       const id = setTimeout(() => play(), 0);
       return () => clearTimeout(id);
     }
-  }, [text, audioUrl, lang]);
+  }, [text, resolvedUrl, lang]);
 
   useEffect(() => {
     if (mode !== 'audio' || !audioRef.current) return;
@@ -104,12 +164,12 @@ export function useNarration({ text, audioUrl, lang = 'mn', autoPlay = false, on
       el.removeEventListener('ended', onEnded);
       el.removeEventListener('timeupdate', onTime);
     };
-  }, [mode, audioUrl]);
+  }, [mode, resolvedUrl]);
 
   const audioProps = useMemo(
-    () => ({ ref: audioRef, src: audioUrl, preload: 'metadata', className: 'hidden' }),
-    [audioUrl],
+    () => ({ ref: audioRef, src: resolvedUrl ?? undefined, preload: 'metadata', className: 'hidden' }),
+    [resolvedUrl],
   );
 
-  return { status, progress, charIndex, play, pause, stop, audioProps, mode };
+  return { status, progress, charIndex, play, pause, stop, audioProps, mode, source };
 }
