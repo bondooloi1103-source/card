@@ -310,3 +310,41 @@ export const TYPE_CONFIG = {
   birthplace:{ color: '#E05C00', label: 'Төрсөн Газар' },
   cultural:  { color: '#8B6914', label: 'Соёл' },
 };
+
+// Approximate {lat, lng, zoom} per figure for the Story map panel.
+// Missing figures fall through to ERA_GEO_DEFAULT.
+export const FIGURE_GEO = {
+  1:  { lat: 47.92, lng: 106.92, zoom: 5 }, // Chinggis — heartland
+  5:  { lat: 47.92, lng: 106.92, zoom: 5 }, // Tolui
+  10: { lat: 47.92, lng: 106.92, zoom: 5 }, // Jochi
+  9:  { lat: 43.25, lng:  76.95, zoom: 4 }, // Chagatai — Transoxiana
+  14: { lat: 47.92, lng: 106.92, zoom: 5 }, // Borte
+  17: { lat: 47.92, lng: 106.92, zoom: 5 }, // Alan Gua
+  21: { lat: 47.92, lng: 106.92, zoom: 5 }, // Oelun
+  2:  { lat: 47.20, lng: 102.85, zoom: 5 }, // Ogedei — Karakorum
+  6:  { lat: 47.20, lng: 102.85, zoom: 5 }, // Guyuk
+  4:  { lat: 47.20, lng: 102.85, zoom: 5 }, // Mongke
+  8:  { lat: 48.70, lng:  44.50, zoom: 4 }, // Batu — Sarai
+  19: { lat: 47.20, lng: 102.85, zoom: 5 }, // Toregene
+  15: { lat: 47.20, lng: 102.85, zoom: 5 }, // Sorkhaghtani
+  3:  { lat: 39.90, lng: 116.40, zoom: 4 }, // Kublai — Dadu
+  7:  { lat: 37.40, lng:  46.20, zoom: 4 }, // Hulagu — Maragheh
+  11: { lat: 41.30, lng:  76.40, zoom: 4 }, // Qaidu
+  18: { lat: 41.30, lng:  76.40, zoom: 4 }, // Khutulun
+  20: { lat: 39.90, lng: 116.40, zoom: 4 }, // Chabi
+  12: { lat: 46.80, lng: 105.00, zoom: 5 }, // Dayan Khan
+  16: { lat: 46.80, lng: 105.00, zoom: 5 }, // Mandukhai
+  22: { lat: 47.92, lng: 106.92, zoom: 5 }, // Yesui
+  24: { lat: 41.80, lng: 123.40, zoom: 4 }, // Abahai
+  13: { lat: 47.92, lng: 106.92, zoom: 6 }, // Bogd Khan
+};
+
+// Fallback center per era when no FIGURE_GEO entry exists.
+export const ERA_GEO_DEFAULT = {
+  founding:  { lat: 47.92, lng: 106.92, zoom: 4 },
+  expansion: { lat: 47.00, lng:  80.00, zoom: 3 },
+  yuan:      { lat: 42.00, lng:  90.00, zoom: 3 },
+  northern:  { lat: 46.80, lng: 105.00, zoom: 5 },
+  qing:      { lat: 45.00, lng: 115.00, zoom: 4 },
+  modern:    { lat: 47.92, lng: 106.92, zoom: 5 },
+};
