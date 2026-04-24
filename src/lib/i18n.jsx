@@ -191,6 +191,46 @@ export const STRINGS = {
   'live.results.rematch':   { mn: 'Дахин сорилт',                  en: 'Rematch' },
   'live.results.joinRematch': { mn: 'Шинэ өрөөнд нэгдэх',          en: 'Join new room' },
   'live.abandoned':         { mn: 'Энэ өрөө дууссан байна.',       en: 'This room has ended.' },
+
+  // Tournaments (Phase 3)
+  'nav.tournaments':              { mn: 'Тэмцээн',                        en: 'Tournaments' },
+  'tournament.title':             { mn: 'Тэмцээнүүд',                     en: 'Tournaments' },
+  'tournament.upcoming':          { mn: 'Удахгүй',                        en: 'Upcoming' },
+  'tournament.active':            { mn: 'Идэвхтэй',                       en: 'Active' },
+  'tournament.past':              { mn: 'Өнгөрсөн',                       en: 'Past' },
+  'tournament.play':              { mn: 'Тоглох',                         en: 'Play' },
+  'tournament.viewLeaderboard':   { mn: 'Дэвжээ харах',                   en: 'View leaderboard' },
+  'tournament.viewResult':        { mn: 'Үр дүнгээ харах',                en: 'View your result' },
+  'tournament.alreadyEntered':    { mn: 'Та энэ тэмцээнд оролцсон байна.', en: 'You have already entered this tournament.' },
+  'tournament.noResults':         { mn: 'Оролцогч алга',                  en: 'No entries yet' },
+  'tournament.winners':           { mn: 'Ялагчид',                        en: 'Winners' },
+  'tournament.starts':            { mn: 'Эхлэх:',                         en: 'Starts:' },
+  'tournament.ends':              { mn: 'Дуусах:',                        en: 'Ends:' },
+  'tournament.participants':      { mn: 'оролцогч',                       en: 'participants' },
+  'tournament.empty':             { mn: 'Одоогоор тэмцээн байхгүй байна.', en: 'No tournaments yet.' },
+  'tournament.rank':              { mn: '#',                               en: '#' },
+  'tournament.score':             { mn: 'Оноо',                           en: 'Score' },
+  'tournament.player':            { mn: 'Тоглогч',                        en: 'Player' },
+  'tournament.starts_in':         { mn: 'Эхлэх:',                         en: 'Starts' },
+  'tournament.unpublished':       { mn: 'Нийтлэгдэж байна…',              en: 'Results pending…' },
+
+  // Medals (Phase 3)
+  'medal.gold':                   { mn: 'Алт',                            en: 'Gold' },
+  'medal.silver':                 { mn: 'Мөнгө',                          en: 'Silver' },
+  'medal.bronze':                 { mn: 'Хүрэл',                          en: 'Bronze' },
+  'medal.awardedIn':              { mn: 'тэмцээнд хүртсэн',               en: 'awarded in' },
+
+  // Admin — tournaments
+  'admin.t.title':                { mn: 'Тэмцээнүүд',                     en: 'Tournaments' },
+  'admin.t.new':                  { mn: 'Шинэ тэмцээн',                   en: 'New tournament' },
+  'admin.t.name':                 { mn: 'Нэр',                            en: 'Name' },
+  'admin.t.lang':                 { mn: 'Хэл',                            en: 'Language' },
+  'admin.t.roundSize':            { mn: 'Асуултын тоо',                   en: 'Round size' },
+  'admin.t.startsAt':             { mn: 'Эхлэх цаг',                      en: 'Starts at' },
+  'admin.t.endsAt':               { mn: 'Дуусах цаг',                     en: 'Ends at' },
+  'admin.t.publishNow':           { mn: 'Одоо нийтлэх',                   en: 'Publish now' },
+  'admin.t.published':            { mn: 'Нийтлэгдсэн',                    en: 'Published' },
+  'admin.t.create':               { mn: 'Үүсгэх',                         en: 'Create' },
 };
 
 const LangContext = createContext({ lang: 'mn', setLang: () => {}, t: (k) => k });

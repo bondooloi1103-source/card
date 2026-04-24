@@ -1,5 +1,58 @@
 import { supabase } from '@/lib/supabase';
 
+export async function fetchTournaments() {
+  const { data, error } = await supabase
+    .from('tournaments')
+    .select('id, name, lang, round_size, starts_at, ends_at, published')
+    .order('starts_at', { ascending: false });
+  if (error) throw new Error(error.message);
+  return data ?? [];
+}
+
+export async function fetchTournamentParticipantCounts(tournamentIds) {
+  if (!tournamentIds.length) return {};
+  const { data, error } = await supabase
+    .from('game_results')
+    .select('tournament_id, user_id')
+    .in('tournament_id', tournamentIds);
+  if (error) throw new Error(error.message);
+  const counts = {};
+  for (const row of data ?? []) {
+    counts[row.tournament_id] = (counts[row.tournament_id] ?? 0) + 1;
+  }
+  return counts;
+}
+
+export async function fetchMyTournamentEntries(userId) {
+  const { data, error } = await supabase
+    .from('game_results')
+    .select('tournament_id')
+    .eq('user_id', userId)
+    .not('tournament_id', 'is', null);
+  if (error) throw new Error(error.message);
+  return new Set((data ?? []).map((r) => r.tournament_id));
+}
+
+export async function fetchTournamentLeaderboard(tournamentId) {
+  const { data, error } = await supabase
+    .from('v_tournament_leaderboard')
+    .select('tournament_id, user_id, username, score, total, completed_at, rank')
+    .eq('tournament_id', tournamentId)
+    .order('rank', { ascending: true });
+  if (error) throw new Error(error.message);
+  return data ?? [];
+}
+
+export async function fetchTournament(id) {
+  const { data, error } = await supabase
+    .from('tournaments')
+    .select('id, name, lang, round_size, starts_at, ends_at, published')
+    .eq('id', id)
+    .single();
+  if (error) throw new Error(error.message);
+  return data;
+}
+
 async function invoke(name, body) {
   const { data, error } = await supabase.functions.invoke(name, { body });
   if (error) throw new Error(error.message ?? 'function_error');

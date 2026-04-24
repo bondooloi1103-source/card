@@ -144,6 +144,19 @@ export default function Navbar({ onScrollTo }) {
             </button>
           )}
 
+          {/* Tournaments button — always visible when authenticated */}
+          {session && (
+            <button
+              onClick={() => navigate('/app/tournaments')}
+              className="relative group hidden md:flex items-center gap-2 px-3 py-2 text-[10px] font-meta tracking-[0.24em] uppercase text-brass hover:text-ivory transition-colors"
+            >
+              <span className="absolute inset-0 border border-brass/40 group-hover:border-brass/90 transition-colors" />
+              <CornerTicks size={6} inset={2} thickness={1} opacity={0.8} />
+              <span className="relative z-10">🏆</span>
+              <span className="hidden sm:inline relative z-10">{t('nav.tournaments')}</span>
+            </button>
+          )}
+
           {/* Session badge */}
           {session && (
             <span className="hidden lg:inline-flex items-center gap-2 font-meta text-[10px] tracking-[0.22em] uppercase text-ivory/50">

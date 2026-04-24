@@ -21,6 +21,8 @@ import ScanChat from '@/pages/ScanChat';
 import DuelIntro from '@/pages/DuelIntro';
 import DuelSummary from '@/pages/DuelSummary';
 import Leaderboard from '@/pages/Leaderboard';
+import Tournaments from '@/pages/Tournaments';
+import TournamentDetail from '@/pages/TournamentDetail';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -64,6 +66,8 @@ const AuthenticatedApp = () => {
       <Route path="/duel/:id" element={<OtpGate><DuelIntro /></OtpGate>} />
       <Route path="/duel/:id/summary" element={<OtpGate><DuelSummary /></OtpGate>} />
       <Route path="/leaderboard" element={<OtpGate><Leaderboard /></OtpGate>} />
+      <Route path="/app/tournaments" element={<OtpGate><Tournaments /></OtpGate>} />
+      <Route path="/app/tournaments/:id" element={<OtpGate><TournamentDetail /></OtpGate>} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );

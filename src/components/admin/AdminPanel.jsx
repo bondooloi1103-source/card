@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { CATEGORIES } from '@/lib/figuresData';
+import AdminTournaments from '@/components/admin/Tournaments';
 import { base44 } from '@/api/base44Client';
 import { useAppSettings } from '@/hooks/useAppSettings';
 import { listInviteCodes, createInviteCode, deleteInviteCode, listAccounts } from '@/lib/authStore';
@@ -269,6 +270,9 @@ export default function AdminPanel({ figures, onClose, onFiguresChange }) {
           </TabsTrigger>
           <TabsTrigger value="settings" className="gap-1.5 text-xs font-body">
             <Settings className="w-3.5 h-3.5" /> Тохиргоо
+          </TabsTrigger>
+          <TabsTrigger value="tournaments" className="gap-1.5 text-xs font-body">
+            🏆 Тэмцээн
           </TabsTrigger>
         </TabsList>
 
@@ -619,19 +623,19 @@ export default function AdminPanel({ figures, onClose, onFiguresChange }) {
                     value={brandForm.site_name}
                     onChange={e => setBrandForm(f => ({ ...f, site_name: e.target.value }))}
                     className="bg-muted border-none text-sm font-body"
-                    placeholder="Монголын Түүхэн Хөзрүүд"
+                    placeholder="Altan Domog"
                   />
                 </div>
               </div>
               <div className="flex items-center gap-3">
                 <div className="flex-1 rounded-xl bg-muted px-4 py-2 flex items-center gap-2">
                   <span className="text-xl">{brandForm.site_logo || '🏇'}</span>
-                  <span className="font-cinzel text-sm font-bold text-foreground">{brandForm.site_name || 'Монголын Түүхэн Хөзрүүд'}</span>
+                  <span className="font-cinzel text-sm font-bold text-foreground">{brandForm.site_name || 'Altan Domog'}</span>
                 </div>
                 <Button
                   onClick={async () => {
                     await saveSetting('site_logo', brandForm.site_logo || '🏇');
-                    await saveSetting('site_name', brandForm.site_name || 'Монголын Түүхэн Хөзрүүд');
+                    await saveSetting('site_name', brandForm.site_name || 'Altan Domog');
                     showToast('Брэнд хадгаллаа!');
                     addLog('Сайтын нэр/лого шинэчлэгдлээ', 'ok');
                   }}
@@ -651,6 +655,11 @@ export default function AdminPanel({ figures, onClose, onFiguresChange }) {
             </div>
           </div>
         </TabsContent>
+        {/* Tournaments */}
+        <TabsContent value="tournaments" className="flex-1 overflow-auto p-6">
+          <AdminTournaments onToast={showToast} />
+        </TabsContent>
+
       </Tabs>
 
       {/* Toast */}
