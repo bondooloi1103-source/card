@@ -52,24 +52,20 @@ export default function Navbar({ onScrollTo }) {
 
       <div className="max-w-[92rem] mx-auto px-4 md:px-8 h-14 md:h-16 flex items-center justify-between gap-4">
 
-        {/* Imprint — monogram + wordmark (subtitle hidden below md) */}
+        {/* Imprint — circular Altan Domog emblem (wordmark is in the logo itself) */}
         <button
           onClick={() => handleClick('hero')}
-          className="flex items-center gap-2.5 group shrink-0"
+          className="flex items-center gap-2 group shrink-0"
           aria-label="Нүүр"
         >
-          <div className="relative w-8 h-8 flex items-center justify-center">
-            <CornerTicks size={7} inset={0} thickness={1} opacity={0.7} />
-            <Fleuron size={18} className="group-hover:scale-105 transition-transform" />
-          </div>
-          <div className="flex flex-col leading-none">
-            <span className="font-display text-[10.5px] tracking-[0.36em] text-ivory/90" style={{ fontVariationSettings: '"opsz" 24, "wght" 500' }}>
-              ALTAN DOMOG
-            </span>
-            <span className="hidden md:inline font-meta text-[8px] tracking-[0.3em] text-brass/80 mt-0.5">
-              CODEX · MMXXVI
-            </span>
-          </div>
+          <img
+            src="/logo.png"
+            alt="Altan Domog"
+            className="h-10 md:h-12 w-auto group-hover:scale-105 transition-transform"
+          />
+          <span className="hidden md:inline font-meta text-[8px] tracking-[0.3em] text-brass/70 self-end pb-2">
+            CODEX · MMXXVI
+          </span>
         </button>
 
         {/* Desktop nav — roman-numeral index (tightened gap + smaller text) */}
