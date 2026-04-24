@@ -83,7 +83,6 @@ export function useNarration({ text, audioUrl, lang = 'mn', autoPlay = false, on
       const id = setTimeout(() => play(), 0);
       return () => clearTimeout(id);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [text, audioUrl, lang]);
 
   useEffect(() => {

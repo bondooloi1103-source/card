@@ -7,7 +7,6 @@ import { useCollection } from '@/hooks/useCollection';
 import { clearOtpVerification } from '@/components/OtpGate';
 import { currentSession } from '@/lib/authStore';
 import { useLang } from '@/lib/i18n';
-import Fleuron from '@/components/ornaments/Fleuron';
 import CornerTicks from '@/components/ornaments/CornerTicks';
 
 const NAV_ITEMS = [
