@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useLang } from '@/lib/i18n';
+import { useLang, translateReason } from '@/lib/i18n';
 import { createSession } from '@/lib/gameApi';
 import Fleuron from '@/components/ornaments/Fleuron';
 import BrassButton from '@/components/ornaments/BrassButton';
@@ -28,7 +28,7 @@ export default function LiveRoomNew() {
       });
       navigate(`/games/quotes/live/${join_code}`);
     } catch (err) {
-      setError(err.message ?? 'create_failed');
+      setError(translateReason(t, err.message ?? 'create_failed'));
       setSubmitting(false);
     }
   }

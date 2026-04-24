@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
-import { useLang } from '@/lib/i18n';
+import { useLang, translateReason } from '@/lib/i18n';
 import { useAuth } from '@/lib/AuthContext';
 import {
   fetchTournaments,
@@ -88,7 +88,7 @@ function TournamentCard({ t, status, entered, participantCount, onPlay, onView }
 export default function Tournaments() {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { lang } = useLang();
+  const { t: translate, lang } = useLang();
 
   const [tournaments, setTournaments] = useState([]);
   const [counts, setCounts] = useState({});
@@ -135,12 +135,7 @@ export default function Tournaments() {
       const { id: sessionId } = await createSession({ mode: 'tournament', tournament_id: t.id });
       navigate(`/games/quotes?session=${sessionId}`);
     } catch (e) {
-      const reason = e.message;
-      if (reason === 'already_entered') {
-        toast.error(lang === 'mn' ? 'Та энэ тэмцээнд оролцсон байна.' : 'You have already entered this tournament.');
-      } else {
-        toast.error(e.message);
-      }
+      toast.error(translateReason(translate, e.message));
       setPlayingId(null);
     }
   };

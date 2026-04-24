@@ -2,7 +2,17 @@ import { supabase } from '@/lib/supabase';
 
 async function callInvoke(name, body) {
   const { data, error } = await supabase.functions.invoke(name, { body });
-  if (error) throw new Error(error.message ?? 'function_error');
+  if (error) {
+    // FunctionsHttpError wraps non-2xx responses with a generic message and
+    // hides the body. Pull `reason` out of the real response so callers can
+    // localize (need_two_players, room_full, already_entered, etc.).
+    let reason = null;
+    try {
+      const parsed = await error.context?.json?.();
+      reason = parsed?.reason ?? null;
+    } catch { /* body wasn't JSON */ }
+    throw new Error(reason || error.message || 'function_error');
+  }
   return data;
 }
 

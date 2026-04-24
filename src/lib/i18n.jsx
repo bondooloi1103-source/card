@@ -192,6 +192,21 @@ export const STRINGS = {
   'live.results.joinRematch': { mn: 'Шинэ өрөөнд нэгдэх',          en: 'Join new room' },
   'live.abandoned':         { mn: 'Энэ өрөө дууссан байна.',       en: 'This room has ended.' },
 
+  // Edge-function error reasons — surfaced from `{ reason }` field.
+  'error.need_two_players':   { mn: 'Эхлэхийн тулд хамгийн багадаа 2 тоглогч хэрэгтэй.', en: 'Need at least 2 players to start.' },
+  'error.room_full':          { mn: 'Өрөө дүүрсэн байна.',            en: 'Room is full.' },
+  'error.bad_state':          { mn: 'Одоогийн төлөв энэ үйлдэлд тохирохгүй.', en: "Can't do that right now." },
+  'error.not_host':           { mn: 'Зөвхөн эзэн эхлүүлэх боломжтой.', en: 'Only the host can do that.' },
+  'error.not_participant':    { mn: 'Та энэ өрөөний оролцогч биш.',    en: 'You are not a participant.' },
+  'error.tournament_closed':  { mn: 'Тэмцээн идэвхтэй биш байна.',     en: 'Tournament is not active.' },
+  'error.already_entered':    { mn: 'Та энэ тэмцээнд оролцсон байна.', en: 'You have already entered this tournament.' },
+  'error.too_late':           { mn: 'Хариулах хугацаа хэтэрсэн.',      en: 'Time is up.' },
+  'error.already_answered_this_round': { mn: 'Та энэ асуултад хариулсан байна.', en: 'You already answered this question.' },
+  'error.forbidden':          { mn: 'Зөвшөөрөлгүй.',                   en: 'Forbidden.' },
+  'error.unauthorized':       { mn: 'Нэвтрээгүй байна.',               en: 'Not signed in.' },
+  'error.not_found':          { mn: 'Олдсонгүй.',                      en: 'Not found.' },
+  'error.duplicate_rematch':  { mn: 'Дахин сорилт аль хэдийн үүсгэгдсэн.', en: 'Rematch already created.' },
+
   // Tournaments (Phase 3)
   'nav.tournaments':              { mn: 'Тэмцээн',                        en: 'Tournaments' },
   'tournament.title':             { mn: 'Тэмцээнүүд',                     en: 'Tournaments' },
@@ -292,4 +307,13 @@ export function figureBio(figure, lang) {
   if (!figure) return '';
   if (lang === 'en' && FIGURE_BIOS_EN[figure.fig_id]) return FIGURE_BIOS_EN[figure.fig_id];
   return figure.bio;
+}
+
+// Translate an edge-function reason code to a localized string, falling back
+// to the raw code if no translation exists.
+export function translateReason(t, reason) {
+  if (!reason) return '';
+  const key = `error.${reason}`;
+  const translated = t(key);
+  return translated === key ? reason : translated;
 }

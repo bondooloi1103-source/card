@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useLang } from '@/lib/i18n';
+import { useLang, translateReason } from '@/lib/i18n';
 import { FIGURES } from '@/lib/figuresData';
 import { buildRoundFromSeed } from '@/lib/seededRound';
 import { submitAnswer, requestRematch } from '@/lib/liveRoomApi';
@@ -98,7 +98,7 @@ function ResultsView({ room, standings, sessionId, navigate, t, lang }) {
       const { new_join_code } = await requestRematch(sessionId);
       if (new_join_code) navigate(`/games/quotes/live/${new_join_code}`);
     } catch (err) {
-      alert(err.message);
+      alert(translateReason(t, err.message));
     } finally {
       setRematching(false);
     }

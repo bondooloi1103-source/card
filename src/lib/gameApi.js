@@ -55,7 +55,17 @@ export async function fetchTournament(id) {
 
 async function invoke(name, body) {
   const { data, error } = await supabase.functions.invoke(name, { body });
-  if (error) throw new Error(error.message ?? 'function_error');
+  if (error) {
+    // FunctionsHttpError wraps non-2xx responses with a generic "Edge Function
+    // returned a non-2xx status code" message. Unwrap so callers can surface
+    // the real reason (tournament_closed, already_entered, bad_round_size…).
+    let reason = null;
+    try {
+      const parsed = await error.context?.json?.();
+      reason = parsed?.reason ?? null;
+    } catch { /* body wasn't JSON */ }
+    throw new Error(reason || error.message || 'function_error');
+  }
   if (!data?.ok) throw new Error(data?.reason ?? 'unknown_error');
   return data;
 }

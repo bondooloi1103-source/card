@@ -1,4 +1,4 @@
-import { useLang } from '@/lib/i18n';
+import { useLang, translateReason } from '@/lib/i18n';
 import { startRoom } from '@/lib/liveRoomApi';
 import Fleuron from '@/components/ornaments/Fleuron';
 import BrassButton from '@/components/ornaments/BrassButton';
@@ -10,7 +10,7 @@ export default function LiveRoomLobby({ room, sessionId, currentUserId }) {
 
   async function onStart() {
     try { await startRoom(sessionId); }
-    catch (err) { alert(err.message); }
+    catch (err) { alert(translateReason(t, err.message)); }
   }
 
   return (
