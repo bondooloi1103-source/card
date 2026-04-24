@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { FIGURES, ERAS, ERA_KEYS, getEra } from '@/lib/figuresData';
 import { useLang } from '@/lib/i18n';
 import CodexRule from '@/components/ornaments/CodexRule';
@@ -7,6 +8,7 @@ import EraFigureTile from '@/components/EraFigureTile';
 
 export default function ChaptersSection({ figures = FIGURES }) {
   const { t, lang } = useLang();
+  const navigate = useNavigate();
   // Group figures by era, keyed to ERA_KEYS order.
   const byEra = useMemo(() => {
     const groups = Object.fromEntries(ERA_KEYS.map((k) => [k, []]));
@@ -84,12 +86,20 @@ export default function ChaptersSection({ figures = FIGURES }) {
 
                   {/* RIGHT — title, intro, figures */}
                   <div className="min-w-0">
-                    <h3
-                      className="display-title text-[clamp(1.75rem,3.5vw,3rem)] text-ivory leading-[1]"
-                      style={{ fontVariationSettings: '"opsz" 96, "SOFT" 60, "wght" 520' }}
-                    >
-                      {lang === 'en' ? era.label_en : era.label}
-                    </h3>
+                    <div className="flex items-start justify-between gap-4">
+                      <h3
+                        className="display-title text-[clamp(1.75rem,3.5vw,3rem)] text-ivory leading-[1]"
+                        style={{ fontVariationSettings: '"opsz" 96, "SOFT" 60, "wght" 520' }}
+                      >
+                        {lang === 'en' ? era.label_en : era.label}
+                      </h3>
+                      <button
+                        onClick={() => navigate(`/story/${key}`)}
+                        className="flex-shrink-0 inline-flex items-center gap-2 px-4 py-2 text-[10px] font-meta tracking-[0.26em] uppercase text-ivory bg-seal/80 border border-seal hover:bg-seal transition-colors"
+                      >
+                        ▶ {t('chapters.play')}
+                      </button>
+                    </div>
 
                     <p className="prose-body italic text-[15px] leading-[1.7] text-ivory/78 mt-4 max-w-2xl">
                       {lang === 'en' ? (era.intro_en || era.intro) : era.intro}
