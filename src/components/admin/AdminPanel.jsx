@@ -11,6 +11,7 @@ import { CATEGORIES } from '@/lib/figuresData';
 import AdminTournaments from '@/components/admin/Tournaments';
 import AdminVoices from '@/components/admin/Voices';
 import StoryEditorModal from '@/components/admin/StoryEditorModal';
+import AdminEras from '@/components/admin/Eras';
 import { base44 } from '@/api/base44Client';
 import { useAppSettings } from '@/hooks/useAppSettings';
 import { listInviteCodes, createInviteCode, deleteInviteCode, listAccounts } from '@/lib/authStore';
@@ -279,6 +280,9 @@ export default function AdminPanel({ figures, onClose, onFiguresChange }) {
           </TabsTrigger>
           <TabsTrigger value="voices" className="gap-1.5 text-xs font-body">
             🎙 Дуу хоолой
+          </TabsTrigger>
+          <TabsTrigger value="eras" className="gap-1.5 text-xs font-body">
+            📖 Бүлэг
           </TabsTrigger>
         </TabsList>
 
@@ -681,6 +685,11 @@ export default function AdminPanel({ figures, onClose, onFiguresChange }) {
         {/* Voices */}
         <TabsContent value="voices" className="flex-1 overflow-auto p-6">
           <AdminVoices onToast={showToast} />
+        </TabsContent>
+
+        {/* Eras */}
+        <TabsContent value="eras" className="flex-1 overflow-auto p-6">
+          <AdminEras onToast={showToast} />
         </TabsContent>
 
       </Tabs>
