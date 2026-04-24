@@ -9,7 +9,10 @@
     "lint": "eslint . --quiet",
     "lint:fix": "eslint . --fix",
     "test": "vitest",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "gen:figures": "node scripts/gen-shared-figures.mjs",
+    "check:figures": "node scripts/gen-shared-figures.mjs --check",
+    "prebuild": "node scripts/gen-shared-figures.mjs --check"
   },
   "dependencies": {
     "@hello-pangea/dnd": "^17.0.0",
