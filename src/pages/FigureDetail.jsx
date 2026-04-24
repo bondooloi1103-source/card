@@ -19,6 +19,7 @@ import Fleuron from '@/components/ornaments/Fleuron';
 import ContourBackground from '@/components/ornaments/ContourBackground';
 import BrassButton from '@/components/ornaments/BrassButton';
 import StoryPlayer from '@/components/StoryPlayer';
+import { useAuthoredContent } from '@/hooks/useAuthoredContent';
 import ShareCard from '@/components/ShareCard';
 import { relType, REL_TYPE_META } from '@/lib/relationships';
 import { useLang, figureName, figureRole, figureBio, figureAchievements, figureFact, figureQuote } from '@/lib/i18n';
@@ -89,6 +90,7 @@ export default function FigureDetail() {
   const [showShare, setShowShare] = useState(false);
   const { isInTeam, toggleTeam } = useMyTeam();
   const { t, lang } = useLang();
+  const { get: getAuthored } = useAuthoredContent(false);
 
   const { data: dbFigures } = useQuery({
     queryKey: ['figures'],
@@ -318,7 +320,7 @@ export default function FigureDetail() {
             className="space-y-12"
           >
             {/* Story player — narrates the figure's story aloud */}
-            <StoryPlayer figure={figure} />
+            <StoryPlayer figure={figure} authored={{ get: getAuthored }} />
 
             {/* Biography — drop-cap */}
             <section className="relative">

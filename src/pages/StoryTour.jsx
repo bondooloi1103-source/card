@@ -5,6 +5,7 @@ import { ArrowLeft, ChevronLeft, ChevronRight } from 'lucide-react';
 import { FIGURES, CATEGORIES, ERAS, ERA_KEYS, getEra } from '@/lib/figuresData';
 import { useLang, figureName, figureRole, figureBio, storyText } from '@/lib/i18n';
 import StoryPlayer from '@/components/StoryPlayer';
+import { useAuthoredContent } from '@/hooks/useAuthoredContent';
 import CornerTicks from '@/components/ornaments/CornerTicks';
 import CodexRule from '@/components/ornaments/CodexRule';
 import CategoryGlyph from '@/components/ornaments/CategoryGlyph';
@@ -25,6 +26,7 @@ export default function StoryTour() {
   const navigate = useNavigate();
   const [params] = useSearchParams();
   const { t, lang } = useLang();
+  const { get: getAuthored } = useAuthoredContent(false);
 
   // Build the playlist (deterministic order by era → fig_id)
   const playlist = useMemo(() => {
@@ -80,7 +82,7 @@ export default function StoryTour() {
   const cat = CATEGORIES[figure.cat];
   const era = ERAS[getEra(figure)];
   const pad = String(figure.fig_id).padStart(2, '0');
-  const transcript = storyText(figure, lang);
+  const transcript = storyText(figure, lang, { get: getAuthored });
 
   return (
     <div className="min-h-screen bg-ink contour-bg">
@@ -178,7 +180,7 @@ export default function StoryTour() {
 
           {/* RIGHT — story player + transcript */}
           <div className="space-y-6">
-            <StoryPlayer figure={figure} autoPlay={autoplay} onDone={handleStoryEnd} />
+            <StoryPlayer figure={figure} autoPlay={autoplay} onDone={handleStoryEnd} authored={{ get: getAuthored }} />
 
             {/* Transcript scrubber — full text, scrollable */}
             <section className="relative bg-ink/40 border border-brass/30">

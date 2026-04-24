@@ -10,10 +10,10 @@ import CornerTicks from '@/components/ornaments/CornerTicks';
  *   variant='button'  — compact pill (used inside Card3D)
  * Narration delegated to useNarration so the same engine powers StoryChapter.
  */
-export default function StoryPlayer({ figure, variant = 'block', autoPlay = false, onDone }) {
+export default function StoryPlayer({ figure, variant = 'block', autoPlay = false, onDone, authored }) {
   const { lang } = useLang();
   const audioUrl = lang === 'en' ? figure?.story_audio_en : figure?.story_audio;
-  const text = useMemo(() => storyText(figure, lang), [figure, lang]);
+  const text = useMemo(() => storyText(figure, lang, authored), [figure, lang, authored]);
   const ttsSupported = typeof window !== 'undefined' && 'speechSynthesis' in window;
   const canPlay = Boolean(audioUrl) || (ttsSupported && text);
 
