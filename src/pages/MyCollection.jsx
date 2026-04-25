@@ -8,7 +8,6 @@ import { motion } from 'framer-motion';
 import SealMark from '@/components/ornaments/SealMark';
 import CornerTicks from '@/components/ornaments/CornerTicks';
 import CategoryGlyph from '@/components/ornaments/CategoryGlyph';
-import Fleuron from '@/components/ornaments/Fleuron';
 import { AsyncStatus, Skeleton, EmptyState } from '@/lib/feedback';
 
 function CollectedCard({ figure, earnedAt }) {
