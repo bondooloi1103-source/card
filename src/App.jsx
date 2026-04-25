@@ -1,5 +1,5 @@
 import { Toaster as ShadcnToaster } from "@/components/ui/toaster"
-import { Toast as FeedbackToastRegistrar, Toaster as HotToaster } from "@/lib/feedback/Toast"
+import { Toast as FeedbackToastRegistrar, Toaster as HotToaster } from "@/lib/feedback"
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClientInstance } from '@/lib/query-client'
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
