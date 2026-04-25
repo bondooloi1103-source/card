@@ -293,6 +293,53 @@ export const STRINGS = {
   'admin.eras.title':           { mn: 'Бүлгүүд',              en: 'Eras' },
   'admin.eras.intro':           { mn: 'Эхлэл',                 en: 'Intro' },
   'admin.eras.outro':           { mn: 'Төгсгөл',               en: 'Outro' },
+
+  // ─── Polish pass: feedback primitives ──────────────────────────────────
+  // Generic toasts
+  'toast.generic.networkError':   { mn: 'Сүлжээний алдаа гарлаа.',         en: 'Network error.' },
+  'toast.generic.unknownError':   { mn: 'Үл мэдэгдэх алдаа.',                en: 'Unexpected error.' },
+  'toast.generic.retry':          { mn: 'Дахин оролдох',                       en: 'Retry' },
+
+  // Quote game
+  'toast.quote.submitFailed':     { mn: 'Үр дүнг илгээж чадсангүй.',         en: 'Could not submit your result.' },
+
+  // Story narration
+  'toast.story.narrationFailed':  { mn: 'Дуу гарч чадсангүй.',                en: 'Narration failed.' },
+  'toast.story.prefetchFailed':   { mn: 'Урьдчилан ачаалах амжилтгүй.',  en: 'Pre-fetch failed; the next slide may take a moment.' },
+
+  // Scan chat
+  'toast.scan.aiFailed':          { mn: 'AI хариулж чадсангүй.',                en: 'AI did not respond.' },
+
+  // Admin
+  'toast.admin.realtimeFailed':   { mn: 'Бодит цагийн холбоо тасарлаа.',  en: 'Live sync disconnected. Refresh to reconnect.' },
+  'toast.admin.saving':           { mn: 'Хадгалж байна…',                       en: 'Saving…' },
+  'toast.admin.saved':            { mn: 'Хадгалагдлаа.',                          en: 'Saved.' },
+  'toast.admin.saveFailed':       { mn: 'Хадгалж чадсангүй.',                  en: 'Save failed.' },
+  'toast.admin.uploading':        { mn: 'Байршуулж байна…',                  en: 'Uploading…' },
+  'toast.admin.audioTooLarge':    { mn: 'Файл хэт том байна (дээд тал нь 5 MB).', en: 'File too large (5 MB max).' },
+
+  // Auth
+  'toast.auth.loginSuccess':      { mn: 'Тавтай морилно уу.',                  en: 'Welcome back.' },
+
+  // Empty states
+  'empty.collection.title':       { mn: 'Хөзрийн цуглуулга хоосон байна', en: 'Your codex is empty' },
+  'empty.collection.description': { mn: 'Шинэ зүтгэлтэн нэмэхийн тулд QR код уншуулж эхэл.', en: 'Scan QR codes to collect figures into your codex.' },
+  'empty.collection.action':      { mn: 'Хэрхэн уншуулах вэ?',           en: 'How does scanning work?' },
+  'empty.leaderboard.title':      { mn: 'Тэргүүлэгчид хоосон',           en: 'No leaders yet' },
+  'empty.leaderboard.description':{ mn: 'Эхлээд тоглож, эхний тэргүүлэгч бай.', en: 'Play a round to be the first on the board.' },
+  'empty.generic.title':          { mn: 'Юу ч олдсонгүй',                       en: 'Nothing to show' },
+  'empty.generic.description':    { mn: '',                                            en: '' },
+  'empty.error.title':            { mn: 'Алдаа гарлаа',                          en: 'Something went wrong' },
+  'empty.error.description':      { mn: 'Дахин оролдоно уу.',                  en: 'Please try again.' },
+
+  // Leaderboard rank context
+  'leaderboard.contextLine':      { mn: 'Та ${rank}-р байр / нийт ${total} тоглогч', en: 'You are #${rank} of ${total} players' },
+
+  // Loading indicators
+  'loading.scan.aiThinking':      { mn: 'AI бодож байна…',                      en: 'AI is thinking…' },
+
+  // Story
+  'story.fullscreenExitHint':     { mn: 'Esc дарж гарах',                       en: 'Press Esc to exit' },
 };
 
 const LangContext = createContext({ lang: 'mn', setLang: () => {}, t: (k) => k });
