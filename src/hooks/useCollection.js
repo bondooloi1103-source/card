@@ -44,5 +44,11 @@ export function useCollection() {
     return true;
   };
 
-  return { collection, hasCard, earnCard, total: collection?.fig_ids?.length ?? 0 };
+  return {
+    collection,
+    hasCard,
+    earnCard,
+    total: collection?.fig_ids?.length ?? 0,
+    loading: collection === null,
+  };
 }

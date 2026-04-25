@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Lock } from 'lucide-react';
+import { ArrowLeft, Lock, BookOpen } from 'lucide-react';
 import { FIGURES, CATEGORIES } from '@/lib/figuresData';
 import { useCollection } from '@/hooks/useCollection';
 import { useLang, figureName } from '@/lib/i18n';
@@ -9,6 +9,7 @@ import SealMark from '@/components/ornaments/SealMark';
 import CornerTicks from '@/components/ornaments/CornerTicks';
 import CategoryGlyph from '@/components/ornaments/CategoryGlyph';
 import Fleuron from '@/components/ornaments/Fleuron';
+import { AsyncStatus, Skeleton, EmptyState } from '@/lib/feedback';
 
 function CollectedCard({ figure, earnedAt }) {
   const navigate = useNavigate();
@@ -95,9 +96,14 @@ function LockedCard({ index }) {
 
 export default function MyCollection() {
   const navigate = useNavigate();
-  const { collection, hasCard, total } = useCollection();
+  const { collection, hasCard, total, loading } = useCollection();
   const [filter, setFilter] = useState('all');
   const { t, lang } = useLang();
+  const activePillRef = useRef(null);
+
+  useEffect(() => {
+    activePillRef.current?.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+  }, [filter]);
 
   const filterOptions = [
     { key: 'all',       label: 'Бүгд',    label_en: 'All',       roman: '∑' },
@@ -164,22 +170,6 @@ export default function MyCollection() {
         </div>
       </div>
 
-      {/* Intro / how-to */}
-      {total === 0 && (
-        <div className="max-w-[82rem] mx-auto px-5 pt-8">
-          <div className="relative border border-brass/30 p-6 md:p-8 bg-ink/60">
-            <CornerTicks size={12} inset={8} thickness={1} opacity={0.8} />
-            <div className="flex flex-col sm:flex-row items-start gap-6">
-              <Fleuron size={56} className="opacity-80 flex-shrink-0" />
-              <div>
-                <h3 className="codex-caption text-brass mb-3">{t('col.howTo.h')}</h3>
-                <p className="prose-body">{t('col.howTo.b')}</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Category filter — catalog style */}
       <div className="max-w-[82rem] mx-auto px-5 pt-8 pb-5">
         <div className="border-y border-brass/30 py-3 overflow-x-auto scrollbar-hide">
@@ -191,6 +181,7 @@ export default function MyCollection() {
               return (
                 <button
                   key={c.key}
+                  ref={active ? activePillRef : null}
                   onClick={() => setFilter(c.key)}
                   className="group flex items-baseline gap-2 py-1 relative"
                 >
@@ -224,15 +215,36 @@ export default function MyCollection() {
 
       {/* Cards grid */}
       <div className="max-w-[82rem] mx-auto px-5 pb-20">
-        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-3">
-          {filteredFigures.map((fig) =>
-            hasCard(fig.fig_id) ? (
-              <CollectedCard key={fig.fig_id} figure={fig} earnedAt={earnedAt[fig.fig_id]} />
-            ) : (
-              <LockedCard key={fig.fig_id} index={fig.fig_id} />
-            )
-          )}
-        </div>
+        <AsyncStatus
+          loading={loading}
+          empty={!loading && total === 0}
+          loadingFallback={<Skeleton.Grid count={24} variant="card" />}
+          emptyFallback={
+            <EmptyState
+              icon={<BookOpen className="w-12 h-12 text-amber-400/60" />}
+              title="empty.collection.title"
+              description="empty.collection.description"
+              action={
+                <button
+                  onClick={() => navigate('/app')}
+                  className="font-meta text-[10px] tracking-[0.3em] uppercase text-brass hover:text-ivory"
+                >
+                  {t('empty.collection.action')}
+                </button>
+              }
+            />
+          }
+        >
+          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-3">
+            {filteredFigures.map((fig) =>
+              hasCard(fig.fig_id) ? (
+                <CollectedCard key={fig.fig_id} figure={fig} earnedAt={earnedAt[fig.fig_id]} />
+              ) : (
+                <LockedCard key={fig.fig_id} index={fig.fig_id} />
+              )
+            )}
+          </div>
+        </AsyncStatus>
       </div>
     </div>
   );
