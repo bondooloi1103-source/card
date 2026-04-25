@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { ShieldCheck, KeyRound, UserRound, LogIn } from 'lucide-react';
+import { ShieldCheck, KeyRound, UserRound, LogIn, Eye, EyeOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -10,6 +10,7 @@ import {
   currentSession,
   bootstrapCode,
 } from '@/lib/authStore';
+import { notify } from '@/lib/feedback';
 
 const REASON_MSG = {
   not_found: 'Код олдсонгүй.',
@@ -24,6 +25,31 @@ const errMsg = (reason) => REASON_MSG[reason] || 'Алдаа гарлаа.';
 
 const panelStyle = { border: '1px solid rgba(201,168,76,0.25)', background: 'rgba(10,12,20,0.85)' };
 const inputWrapStyle = { border: '1px solid rgba(201,168,76,0.3)', background: 'rgba(0,0,0,0.3)' };
+
+function PasswordInput({ value, onChange, placeholder = '********', autoFocus = false }) {
+  const [reveal, setReveal] = useState(false);
+  return (
+    <div className="relative">
+      <Input
+        type={reveal ? 'text' : 'password'}
+        value={value}
+        onChange={onChange}
+        placeholder={placeholder}
+        className="text-foreground pr-10"
+        style={inputWrapStyle}
+        autoFocus={autoFocus}
+      />
+      <button
+        type="button"
+        onClick={() => setReveal((r) => !r)}
+        aria-label={reveal ? 'Нууц үгийг нуух' : 'Нууц үгийг харах'}
+        className="absolute right-2 top-1/2 -translate-y-1/2 text-brass/60 hover:text-brass"
+      >
+        {reveal ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+      </button>
+    </div>
+  );
+}
 
 export default function OtpLogin() {
   const navigate = useNavigate();
@@ -137,6 +163,7 @@ function RedeemForm({ next, navigate }) {
     const result = await registerWithCode({ code, username, password });
     setBusy(false);
     if (!result.ok) { setError(errMsg(result.reason)); return; }
+    notify.success('toast.auth.loginSuccess');
     navigate(next, { replace: true });
   };
 
@@ -159,7 +186,9 @@ function RedeemForm({ next, navigate }) {
           </div>
         </label>
 
-        {error && <p className="text-sm text-red-400 font-body">{error}</p>}
+        {error && (
+          <p role="alert" aria-live="assertive" className="text-sm text-red-400 font-body">{error}</p>
+        )}
 
         <Button
           type="submit"
@@ -201,31 +230,19 @@ function RedeemForm({ next, navigate }) {
         <span className="text-xs font-cormorant tracking-widest uppercase" style={{ color: '#c9a84c' }}>
           Нууц үг
         </span>
-        <Input
-          type="password"
-          value={password}
-          onChange={e => setPassword(e.target.value)}
-          placeholder="********"
-          className="text-foreground"
-          style={inputWrapStyle}
-        />
+        <PasswordInput value={password} onChange={e => setPassword(e.target.value)} />
       </label>
 
       <label className="block space-y-2">
         <span className="text-xs font-cormorant tracking-widest uppercase" style={{ color: '#c9a84c' }}>
           Нууц үг дахин
         </span>
-        <Input
-          type="password"
-          value={confirm}
-          onChange={e => setConfirm(e.target.value)}
-          placeholder="********"
-          className="text-foreground"
-          style={inputWrapStyle}
-        />
+        <PasswordInput value={confirm} onChange={e => setConfirm(e.target.value)} />
       </label>
 
-      {error && <p className="text-sm text-red-400 font-body">{error}</p>}
+      {error && (
+        <p role="alert" aria-live="assertive" className="text-sm text-red-400 font-body">{error}</p>
+      )}
 
       <div className="flex gap-2">
         <Button
@@ -262,6 +279,7 @@ function LoginForm({ next, navigate }) {
     const result = await login({ username, password });
     setBusy(false);
     if (!result.ok) { setError(errMsg(result.reason)); return; }
+    notify.success('toast.auth.loginSuccess');
     navigate(next, { replace: true });
   };
 
@@ -287,17 +305,12 @@ function LoginForm({ next, navigate }) {
         <span className="text-xs font-cormorant tracking-widest uppercase" style={{ color: '#c9a84c' }}>
           Нууц үг
         </span>
-        <Input
-          type="password"
-          value={password}
-          onChange={e => setPassword(e.target.value)}
-          placeholder="********"
-          className="text-foreground"
-          style={inputWrapStyle}
-        />
+        <PasswordInput value={password} onChange={e => setPassword(e.target.value)} />
       </label>
 
-      {error && <p className="text-sm text-red-400 font-body">{error}</p>}
+      {error && (
+        <p role="alert" aria-live="assertive" className="text-sm text-red-400 font-body">{error}</p>
+      )}
 
       <Button
         type="submit"
