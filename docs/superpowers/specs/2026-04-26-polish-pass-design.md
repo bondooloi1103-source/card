@@ -13,7 +13,7 @@ Without a shared primitives layer, every page solved feedback differently. The d
 
 **In scope**
 - New shared module `src/lib/feedback/` with six exports: `<Toast>` + `notify`, `<ErrorBoundary>`, `<Skeleton>` family, `<EmptyState>`, `<AsyncStatus>`, `useDebouncedValue`.
-- Apply primitives to every site listed in the per-theme application plan (§3) — all 25 audit issues end-to-end.
+- Apply primitives to every site listed in the per-theme application plan (§4) — all 25 audit issues end-to-end (split into 26 line items because audit issue #4 covers two physical sites).
 - Add Mongolian + English copy for every new user-facing string via existing `src/lib/i18n.jsx` `STRINGS` table.
 - Behavior tests for all six primitives.
 - Smoke tests on every page touched: assert the new state (skeleton, empty, error, success-toast) renders.
@@ -271,7 +271,7 @@ toast.admin.saving / saved / saveFailed / uploading
 toast.auth.loginSuccess
 
 empty.collection.title / description / action
-empty.leaderboard.title (existing, verify) / description
+empty.leaderboard.title / description     // grep first; reuse if present, else add
 leaderboard.contextLine             // "You are #{rank} of {total}"
 
 loading.scan.aiThinking
