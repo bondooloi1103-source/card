@@ -347,8 +347,12 @@ const LangContext = createContext({ lang: 'mn', setLang: () => {}, t: (k) => k }
 export function LangProvider({ children }) {
   const [lang, setLangState] = useState(() => {
     if (typeof window === 'undefined') return 'mn';
-    const saved = localStorage.getItem(LANG_KEY);
-    return LOCALES.includes(saved) ? saved : 'mn';
+    try {
+      const saved = window.localStorage?.getItem?.(LANG_KEY);
+      return LOCALES.includes(saved) ? saved : 'mn';
+    } catch (_) {
+      return 'mn';
+    }
   });
 
   const setLang = useCallback((next) => {

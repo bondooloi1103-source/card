@@ -1,4 +1,5 @@
-import { Toaster } from "@/components/ui/toaster"
+import { Toaster as ShadcnToaster } from "@/components/ui/toaster"
+import { Toast as FeedbackToastRegistrar, Toaster as HotToaster } from "@/lib/feedback/Toast"
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClientInstance } from '@/lib/query-client'
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
@@ -84,7 +85,15 @@ function App() {
           <Router>
             <AuthenticatedApp />
           </Router>
-          <Toaster />
+          <ShadcnToaster />
+          <HotToaster
+            position="top-center"
+            toastOptions={{
+              className: 'font-prose',
+              style: { background: '#0e0b07', color: '#e8d5a3', border: '1px solid rgba(201,168,76,0.4)' },
+            }}
+          />
+          <FeedbackToastRegistrar />
         </QueryClientProvider>
       </LangProvider>
     </AuthProvider>
