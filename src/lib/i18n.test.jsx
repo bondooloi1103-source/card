@@ -8,12 +8,18 @@ describe('roster-gate i18n', () => {
     expect(STRINGS['error.roster_lookup_failed'].en).toMatch(/.+/);
   });
   it('has bilingual live.lobby.rosterFigures', () => {
-    expect(STRINGS['live.lobby.rosterFigures']).toBeDefined();
+    const s = STRINGS['live.lobby.rosterFigures'];
+    expect(s?.mn).toMatch(/.+/);
+    expect(s?.en).toMatch(/.+/);
   });
   it('has bilingual live.lobby.allFigures', () => {
-    expect(STRINGS['live.lobby.allFigures']).toBeDefined();
+    const s = STRINGS['live.lobby.allFigures'];
+    expect(s?.mn).toMatch(/.+/);
+    expect(s?.en).toMatch(/.+/);
   });
   it('has bilingual live.lobby.allFiguresHint', () => {
-    expect(STRINGS['live.lobby.allFiguresHint']).toBeDefined();
+    const s = STRINGS['live.lobby.allFiguresHint'];
+    expect(s?.mn).toMatch(/.+/);
+    expect(s?.en).toMatch(/.+/);
   });
 });
