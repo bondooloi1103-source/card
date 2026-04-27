@@ -18,10 +18,17 @@ export default function LiveRoomGame({ room, sessionId, currentUserId, showResul
 
   const isHost = room.session?.host_user_id === currentUserId;
 
+  const figurePool = useMemo(() => {
+    const ids = room.session?.eligible_fig_ids;
+    if (!ids || ids.length === 0) return FIGURES;
+    const idSet = new Set(ids);
+    return FIGURES.filter((f) => idSet.has(f.fig_id));
+  }, [room.session?.eligible_fig_ids]);
+
   const round = useMemo(() => {
     if (!room.session?.seed || !room.session?.round_size) return [];
-    return buildRoundFromSeed(FIGURES, room.session.round_size, room.session.seed);
-  }, [room.session?.seed, room.session?.round_size]);
+    return buildRoundFromSeed(figurePool, room.session.round_size, room.session.seed);
+  }, [room.session?.seed, room.session?.round_size, figurePool]);
 
   const currentIdx = room.session?.current_round_idx ?? 0;
   const q = round[currentIdx];
