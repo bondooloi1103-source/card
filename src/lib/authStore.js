@@ -84,6 +84,13 @@ export const registerWithCode = async ({ code, username, password }) => {
     });
     if (setErr) return { ok: false, reason: 'session_failed' };
 
+    // Grant the starter pack on first registration (idempotent on the server side).
+    try {
+      await supabase.functions.invoke('grant-starter-pack', { body: {} });
+    } catch (err) {
+      console.warn('grant-starter-pack invoke failed (will retry next login)', err);
+    }
+
     return { ok: true, account: { username } };
   } catch {
     return { ok: false, reason: 'server' };
@@ -101,6 +108,12 @@ export const login = async ({ username, password }) => {
       return { ok: false, reason: p ? 'bad_password' : 'not_found' };
     }
     return { ok: false, reason: 'server' };
+  }
+  // Grant the starter pack on first login (idempotent on the server side).
+  try {
+    await supabase.functions.invoke('grant-starter-pack', { body: {} });
+  } catch (err) {
+    console.warn('grant-starter-pack invoke failed (will retry next login)', err);
   }
   return { ok: true, account: { username } };
 };
