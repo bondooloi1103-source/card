@@ -12,7 +12,7 @@ import Landing from '@/pages/Landing';
 import OtpLogin from '@/pages/OtpLogin';
 import OtpGate from '@/components/OtpGate';
 import FigureDetail from '@/pages/FigureDetail';
-import MyCollection from '@/pages/MyCollection';
+import Collection from '@/pages/Collection';
 import GameQuoteGuess from '@/pages/GameQuoteGuess';
 import LiveRoomNew from '@/pages/LiveRoomNew';
 import LiveRoomEntry from '@/pages/LiveRoomEntry';
@@ -59,7 +59,7 @@ const AuthenticatedApp = () => {
       <Route path="/c/:figId" element={<OtpGate><ScanChat /></OtpGate>} />
       <Route path="/app" element={<OtpGate><Home /></OtpGate>} />
       <Route path="/figure/:figId" element={<OtpGate><FigureDetail /></OtpGate>} />
-      <Route path="/collection" element={<OtpGate><MyCollection /></OtpGate>} />
+      <Route path="/collection" element={<OtpGate><Collection /></OtpGate>} />
       <Route path="/games/quotes" element={<OtpGate><GameQuoteGuess /></OtpGate>} />
       <Route path="/games/quotes/live" element={<OtpGate><LiveRoomEntry /></OtpGate>} />
       <Route path="/games/quotes/live/new" element={<OtpGate><LiveRoomNew /></OtpGate>} />
