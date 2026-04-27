@@ -1,7 +1,7 @@
 import { createClient, SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2.45.0';
 import { handleOptions, json } from '../_shared/cors.ts';
 import { buildRoundFromSeed } from '../_shared/seededRound.ts';
-import { FIGURES } from '../_shared/figures.ts';
+import { figurePoolFor } from '../_shared/rosterGate.ts';
 
 const PRESENCE_CHANNEL = (sid: string) => `game:session:${sid}`;
 
@@ -44,12 +44,12 @@ async function loadLobby(admin: SupabaseClient, sessionId: string) {
 async function doReveal(admin: SupabaseClient, sessionId: string) {
   const { data: session } = await admin
     .from('game_sessions')
-    .select('current_round_idx, current_deadline, seed, round_size, timer_s, host_user_id')
+    .select('current_round_idx, current_deadline, seed, round_size, timer_s, host_user_id, eligible_fig_ids')
     .eq('id', sessionId)
     .maybeSingle();
   if (!session) return;
 
-  const round = buildRoundFromSeed(FIGURES, session.round_size, session.seed);
+  const round = buildRoundFromSeed(figurePoolFor(session.eligible_fig_ids), session.round_size, session.seed);
   const q = round[session.current_round_idx];
   if (!q) return;
 
@@ -105,12 +105,12 @@ async function doReveal(admin: SupabaseClient, sessionId: string) {
 async function doEnd(admin: SupabaseClient, sessionId: string) {
   const { data: session } = await admin
     .from('game_sessions')
-    .select('id, seed, round_size, tournament_id')
+    .select('id, seed, round_size, tournament_id, eligible_fig_ids')
     .eq('id', sessionId)
     .maybeSingle();
   if (!session) return;
 
-  const round = buildRoundFromSeed(FIGURES, session.round_size, session.seed);
+  const round = buildRoundFromSeed(figurePoolFor(session.eligible_fig_ids), session.round_size, session.seed);
 
   const { data: parts } = await admin
     .from('game_participants')
@@ -194,7 +194,7 @@ Deno.serve(async (req) => {
 
   const { data: session, error: sErr } = await admin
     .from('game_sessions')
-    .select('id, mode, lang, round_size, timer_s, player_cap, host_user_id, status, seed, current_round_idx, current_sent_at, current_deadline, rematch_session_id, tournament_id')
+    .select('id, mode, lang, round_size, timer_s, player_cap, host_user_id, status, seed, current_round_idx, current_sent_at, current_deadline, rematch_session_id, tournament_id, eligible_fig_ids')
     .eq('id', session_id)
     .maybeSingle();
   if (sErr || !session) return json({ ok: false, reason: 'not_found' }, 404);
@@ -298,7 +298,7 @@ Deno.serve(async (req) => {
         return json({ ok: false, reason: 'too_late' }, 409);
       }
 
-      const round = buildRoundFromSeed(FIGURES, session.round_size, session.seed);
+      const round = buildRoundFromSeed(figurePoolFor(session.eligible_fig_ids), session.round_size, session.seed);
       const q = round[session.current_round_idx!];
       if (!q) return json({ ok: false, reason: 'bad_state' }, 500);
 
