@@ -6,6 +6,8 @@ import { FIGURES } from '@/lib/figuresData';
 import { useLang, figureName } from '@/lib/i18n';
 import { buildRoundFromSeed } from '@/lib/seededRound';
 import { createSession, submitResult, fetchSession } from '@/lib/gameApi';
+import { useOwnedFigures } from '@/hooks/useOwnedFigures';
+import { currentSession } from '@/lib/authStore';
 import RoundPlayer from '@/components/game/RoundPlayer';
 import Fleuron from '@/components/ornaments/Fleuron';
 import CodexRule from '@/components/ornaments/CodexRule';
@@ -13,15 +15,23 @@ import BrassButton from '@/components/ornaments/BrassButton';
 import { notify, Skeleton } from '@/lib/feedback';
 
 const ROUND_SIZE = 10;
+// Need at least 4 quote-bearing figures to build the multiple-choice round.
+const MIN_FIGS_FOR_ROSTER = 4;
 
 export default function GameQuoteGuess() {
   const navigate = useNavigate();
   const [params] = useSearchParams();
   const { t, lang: activeLang } = useLang();
   const sessionIdFromUrl = params.get('session');
+  const isDemo = params.get('demo') === '1';
+
+  const session = currentSession();
+  const userId = session?.account_id ?? null;
+  const { figIds: ownedFigIds, loading: ownedLoading } = useOwnedFigures(userId);
 
   const [sessionState, setSessionState] = useState(null);
   const [loadError, setLoadError] = useState(null);
+  const [rosterFallback, setRosterFallback] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -50,10 +60,22 @@ export default function GameQuoteGuess() {
     };
   }, [sessionIdFromUrl, activeLang]);
 
+  const figurePool = useMemo(() => {
+    if (isDemo || ownedLoading) return FIGURES;
+    const owned = FIGURES.filter((f) => ownedFigIds.includes(f.fig_id));
+    const ownedWithQuotes = owned.filter((f) => f.quote);
+    if (ownedWithQuotes.length < MIN_FIGS_FOR_ROSTER) {
+      if (!rosterFallback) setRosterFallback(true);
+      return FIGURES;
+    }
+    if (rosterFallback) setRosterFallback(false);
+    return owned;
+  }, [isDemo, ownedLoading, ownedFigIds, rosterFallback]);
+
   const round = useMemo(() => {
-    if (!sessionState) return [];
-    return buildRoundFromSeed(FIGURES, sessionState.round_size, sessionState.seed);
-  }, [sessionState]);
+    if (!sessionState || ownedLoading) return [];
+    return buildRoundFromSeed(figurePool, sessionState.round_size, sessionState.seed);
+  }, [sessionState, figurePool, ownedLoading]);
 
   const [idx, setIdx] = useState(0);
   const [picked, setPicked] = useState(null); // picked figId (number) or null
@@ -82,7 +104,7 @@ export default function GameQuoteGuess() {
   const next = useCallback(async () => {
     if (idx + 1 >= round.length) {
       setDone(true);
-      if (!submitted && sessionState) {
+      if (!submitted && sessionState && !isDemo) {
         setSubmitted(true);
         try {
           await submitResult({ session_id: sessionState.id, answers });
@@ -155,6 +177,26 @@ export default function GameQuoteGuess() {
           <ArrowLeft className="w-3.5 h-3.5" /> {t('fd.back')}
         </button>
         <div className="flex items-center gap-3">
+          {isDemo && (
+            <span
+              className="font-meta text-[10px] tracking-[0.28em] uppercase px-2 py-0.5 rounded"
+              style={{ border: '1px solid rgba(201,168,76,0.5)', color: '#c9a84c' }}
+              title={activeLang === 'en' ? 'Demo mode — XP not counted' : 'Demo горим — XP тоологдохгүй'}
+            >
+              Demo
+            </span>
+          )}
+          {!isDemo && rosterFallback && (
+            <span
+              className="font-meta text-[10px] tracking-[0.28em] uppercase px-2 py-0.5 rounded opacity-80"
+              style={{ border: '1px dashed rgba(201,168,76,0.5)', color: '#c9a84c' }}
+              title={activeLang === 'en'
+                ? 'You need 4+ owned figures with quotes to play with your roster.'
+                : 'Цуглуулсан цөөн байна — бүх дүрсээр тоглож байна'}
+            >
+              {activeLang === 'en' ? 'All figures' : 'Бүгд'}
+            </span>
+          )}
           <span className="font-meta text-[10px] tracking-[0.28em] uppercase text-brass/80">
             {String(idx + 1).padStart(2, '0')} / {String(round.length).padStart(2, '0')}
           </span>
