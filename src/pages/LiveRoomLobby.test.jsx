@@ -50,3 +50,40 @@ describe('LiveRoomLobby', () => {
     expect(screen.getByRole('button', { name: /share link|холбоос хуваалцах/i })).toBeInTheDocument();
   });
 });
+
+function makeRoom({ eligible, hostId = 'host-uid' }) {
+  return {
+    session: {
+      id: 'sess-1',
+      join_code: 'ABCDEF',
+      host_user_id: hostId,
+      player_cap: 8,
+      status: 'open',
+      eligible_fig_ids: eligible,
+    },
+    participants: [{ user_id: hostId, username: 'host' }],
+  };
+}
+
+describe('LiveRoomLobby roster badge', () => {
+  it('renders the roster-figures badge with count when eligible_fig_ids is non-empty', () => {
+    render(
+      <LangProvider>
+        <LiveRoomLobby room={makeRoom({ eligible: [1, 3, 4, 17, 34, 36] })}
+          sessionId="sess-1" currentUserId="host-uid" />
+      </LangProvider>,
+    );
+    expect(screen.getByText(/Roster figures|Цуглуулсан дүрсүүд/)).toBeInTheDocument();
+    expect(screen.getByText(/· 6/)).toBeInTheDocument();
+  });
+
+  it('renders the All-figures badge when eligible_fig_ids is null', () => {
+    render(
+      <LangProvider>
+        <LiveRoomLobby room={makeRoom({ eligible: null })}
+          sessionId="sess-1" currentUserId="host-uid" />
+      </LangProvider>,
+    );
+    expect(screen.getByText(/All figures|Бүгд/)).toBeInTheDocument();
+  });
+});

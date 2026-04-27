@@ -73,6 +73,8 @@ export default function LiveRoomLobby({ room, sessionId, currentUserId }) {
           </button>
         </div>
 
+        <RosterBadge eligibleFigIds={room.session?.eligible_fig_ids} t={t} />
+
         <div className="space-y-2">
           <p className="font-meta text-[10px] tracking-[0.3em] uppercase text-brass/70">
             {t('live.lobby.players')} ({room.participants.length}/{room.session?.player_cap ?? 8})
@@ -107,5 +109,27 @@ export default function LiveRoomLobby({ room, sessionId, currentUserId }) {
         )}
       </div>
     </div>
+  );
+}
+
+function RosterBadge({ eligibleFigIds, t }) {
+  if (eligibleFigIds && eligibleFigIds.length > 0) {
+    return (
+      <span
+        className="font-meta text-[10px] tracking-[0.28em] uppercase px-2 py-0.5 rounded inline-block"
+        style={{ border: '1px solid rgba(201,168,76,0.6)', color: '#c9a84c' }}
+      >
+        {t('live.lobby.rosterFigures')} · {eligibleFigIds.length}
+      </span>
+    );
+  }
+  return (
+    <span
+      className="font-meta text-[10px] tracking-[0.28em] uppercase px-2 py-0.5 rounded inline-block opacity-80"
+      style={{ border: '1px dashed rgba(201,168,76,0.5)', color: '#c9a84c' }}
+      title={t('live.lobby.allFiguresHint')}
+    >
+      {t('live.lobby.allFigures')}
+    </span>
   );
 }
