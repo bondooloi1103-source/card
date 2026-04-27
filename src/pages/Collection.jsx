@@ -21,6 +21,12 @@ export default function Collection() {
       <div className="min-h-screen flex flex-col items-center justify-center gap-4 px-6 text-center text-brass">
         <p className="text-lg">Карт уншуулаад цуглуулгаа эхлүүл</p>
         <Link
+          to="/figures"
+          className="px-5 py-2 rounded border border-brass/50 hover:bg-brass/10"
+        >
+          Бүх дүрсийг үзэх
+        </Link>
+        <Link
           to="/games/quotes/live?demo=1"
           className="px-5 py-2 rounded border border-brass/50 hover:bg-brass/10"
         >
@@ -36,7 +42,15 @@ export default function Collection() {
 
   return (
     <div className="min-h-screen px-4 py-6 bg-ink text-brass">
-      <h1 className="text-2xl mb-4">Миний цуглуулга ({owned.length})</h1>
+      <div className="flex items-center justify-between mb-4">
+        <h1 className="text-2xl">Миний цуглуулга ({owned.length})</h1>
+        <Link
+          to="/figures"
+          className="px-3 py-1 rounded border border-brass/50 hover:bg-brass/10 text-sm"
+        >
+          + Бүх дүрсийг үзэх
+        </Link>
+      </div>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {owned.map((f) => (
           <Link

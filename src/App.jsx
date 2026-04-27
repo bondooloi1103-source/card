@@ -13,6 +13,8 @@ import OtpLogin from '@/pages/OtpLogin';
 import OtpGate from '@/components/OtpGate';
 import FigureDetail from '@/pages/FigureDetail';
 import Collection from '@/pages/Collection';
+import Figures from '@/pages/Figures';
+import Order from '@/pages/Order';
 import GameQuoteGuess from '@/pages/GameQuoteGuess';
 import LiveRoomNew from '@/pages/LiveRoomNew';
 import LiveRoomEntry from '@/pages/LiveRoomEntry';
@@ -60,6 +62,8 @@ const AuthenticatedApp = () => {
       <Route path="/app" element={<OtpGate><Home /></OtpGate>} />
       <Route path="/figure/:figId" element={<OtpGate><FigureDetail /></OtpGate>} />
       <Route path="/collection" element={<OtpGate><Collection /></OtpGate>} />
+      <Route path="/figures" element={<OtpGate><Figures /></OtpGate>} />
+      <Route path="/order" element={<Order />} />
       <Route path="/games/quotes" element={<OtpGate><GameQuoteGuess /></OtpGate>} />
       <Route path="/games/quotes/live" element={<OtpGate><LiveRoomEntry /></OtpGate>} />
       <Route path="/games/quotes/live/new" element={<OtpGate><LiveRoomNew /></OtpGate>} />
