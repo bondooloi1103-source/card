@@ -133,18 +133,35 @@ const defaultFromSchema = (schema) => {
   }
 };
 
+const fallbackResult = (response_json_schema) => {
+  if (response_json_schema) {
+    const base = defaultFromSchema(response_json_schema);
+    if (base && typeof base === 'object' && !Array.isArray(base)) {
+      if ('answer' in base) base.answer = LLM_UNAVAILABLE_MSG;
+      if ('overall' in base) base.overall = LLM_UNAVAILABLE_MSG;
+    }
+    return base;
+  }
+  return LLM_UNAVAILABLE_MSG;
+};
+
 const integrations = {
   Core: {
-    InvokeLLM: async ({ response_json_schema } = {}) => {
-      if (response_json_schema) {
-        const base = defaultFromSchema(response_json_schema);
-        if (base && typeof base === 'object' && !Array.isArray(base)) {
-          if ('answer' in base) base.answer = LLM_UNAVAILABLE_MSG;
-          if ('overall' in base) base.overall = LLM_UNAVAILABLE_MSG;
+    InvokeLLM: async ({ prompt, response_json_schema } = {}) => {
+      if (!prompt) return fallbackResult(response_json_schema);
+      try {
+        const { data, error } = await supabase.functions.invoke('invoke-llm', {
+          body: { prompt, response_json_schema },
+        });
+        if (error || !data?.ok) {
+          console.warn('invoke-llm failed', error || data);
+          return fallbackResult(response_json_schema);
         }
-        return base;
+        return data.reply ?? fallbackResult(response_json_schema);
+      } catch (err) {
+        console.warn('invoke-llm exception', err);
+        return fallbackResult(response_json_schema);
       }
-      return LLM_UNAVAILABLE_MSG;
     },
     UploadFile: async ({ file }) => {
       if (!file) throw new Error('file required');
