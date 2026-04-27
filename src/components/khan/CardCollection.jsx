@@ -91,7 +91,7 @@ export default function CardCollection() {
   const { ref, isVisible } = useScrollReveal();
 
   return (
-    <section className="py-16 sm:py-20 md:py-24 px-4 sm:px-6">
+    <section id="cards" className="py-16 sm:py-20 md:py-24 px-4 sm:px-6 scroll-mt-20">
       <div className="max-w-7xl mx-auto">
         <div
           ref={ref}

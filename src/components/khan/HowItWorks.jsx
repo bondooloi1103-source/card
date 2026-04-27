@@ -71,7 +71,7 @@ export default function HowItWorks() {
   const { ref, isVisible } = useScrollReveal();
 
   return (
-    <section className="py-16 sm:py-20 md:py-24 px-4 sm:px-6">
+    <section id="how" className="py-16 sm:py-20 md:py-24 px-4 sm:px-6 scroll-mt-20">
       <div className="max-w-6xl mx-auto">
         <div
           ref={ref}

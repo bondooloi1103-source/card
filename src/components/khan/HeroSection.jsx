@@ -261,12 +261,17 @@ export default function HeroSection() {
           ALTAN DOMOG
         </div>
         <div className="hidden md:flex items-center gap-6 lg:gap-8">
-          {['Хэрхэн ажилладаг', 'Цуглуулга', 'Онцлогууд', 'Үнэ'].map(item => (
-            <a key={item} href="#" className="font-cormorant text-base transition-colors duration-300" style={{ color: '#e8d5a370' }}
+          {[
+            { label: 'Хэрхэн ажилладаг', href: '#how' },
+            { label: 'Цуглуулга', href: '#cards' },
+            { label: 'Онцлогууд', href: '#features' },
+            { label: 'Үнэ', href: '#pricing' },
+          ].map(({ label, href }) => (
+            <a key={label} href={href} className="font-cormorant text-base transition-colors duration-300" style={{ color: '#e8d5a370' }}
               onMouseEnter={e => e.target.style.color = '#c9a84c'}
               onMouseLeave={e => e.target.style.color = '#e8d5a370'}
             >
-              {item}
+              {label}
             </a>
           ))}
         </div>
@@ -321,7 +326,13 @@ export default function HeroSection() {
 
           <div className="flex flex-wrap gap-4">
             <GoldButton to="/app">Дэлгэрэнгүй үзэх</GoldButton>
-            <GoldButton to="/app">Захиалах</GoldButton>
+            <Link
+              to="/order?tier=premium"
+              className="px-8 py-3 rounded-full font-cormorant text-lg font-semibold tracking-wider uppercase inline-flex items-center justify-center transition-transform duration-300 hover:scale-[1.03]"
+              style={{ background: '#c9a84c', color: '#0a0c14', border: '1.5px solid #c9a84c' }}
+            >
+              Хөзрийн багц захиалах
+            </Link>
           </div>
         </div>
 
