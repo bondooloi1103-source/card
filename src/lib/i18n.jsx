@@ -369,7 +369,10 @@ export const STRINGS = {
       en: 'You were signed out because this account signed in on another device.' },
 };
 
-const LangContext = createContext({ lang: 'mn', setLang: () => {}, t: (k) => k });
+const LangContext = createContext({ lang: 'mn', setLang: () => {}, t: (k, v) => {
+  if (!v) return k;
+  return Object.keys(v).reduce((s, kk) => s.replaceAll(`{${kk}}`, String(v[kk])), k);
+} });
 
 export function LangProvider({ children }) {
   const [lang, setLangState] = useState(() => {
@@ -394,10 +397,14 @@ export function LangProvider({ children }) {
     }
   }, [lang]);
 
-  const t = useCallback((key) => {
+  const t = useCallback((key, vars) => {
     const entry = STRINGS[key];
-    if (!entry) return key;
-    return entry[lang] ?? entry.mn ?? key;
+    const template = entry ? (entry[lang] ?? entry.mn ?? key) : key;
+    if (!vars) return template;
+    return Object.keys(vars).reduce(
+      (s, k) => s.replaceAll(`{${k}}`, String(vars[k])),
+      template,
+    );
   }, [lang]);
 
   const value = useMemo(() => ({ lang, setLang, t }), [lang, setLang, t]);
