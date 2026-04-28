@@ -3,6 +3,11 @@
 // change call patterns (though several formerly-sync functions are now async).
 
 import { supabase, usernameToEmail, emailToUsername } from '@/lib/supabase';
+import {
+  claimDeviceSession,
+  clearStoredSessionId,
+  stopHeartbeat,
+} from '@/lib/deviceSession';
 
 const BOOTSTRAP_CODE = 'ADMIN001';
 
@@ -84,6 +89,19 @@ export const registerWithCode = async ({ code, username, password }) => {
     });
     if (setErr) return { ok: false, reason: 'session_failed' };
 
+    // Claim the device-session slot. New accounts won't conflict, but the row
+    // still needs to exist so the heartbeat has something to update.
+    const claim = await claimDeviceSession();
+    if (claim?.ok === false && claim.blocked) {
+      await supabase.auth.signOut();
+      return {
+        ok: false,
+        reason: 'device_conflict',
+        device_label: claim.device_label,
+        last_seen: claim.last_seen,
+      };
+    }
+
     // Grant the starter pack on first registration (idempotent on the server side).
     try {
       await supabase.functions.invoke('grant-starter-pack', { body: {} });
@@ -97,7 +115,7 @@ export const registerWithCode = async ({ code, username, password }) => {
   }
 };
 
-export const login = async ({ username, password }) => {
+export const login = async ({ username, password, force = false }) => {
   const email = usernameToEmail(username);
   const { error } = await supabase.auth.signInWithPassword({ email, password });
   if (error) {
@@ -109,6 +127,18 @@ export const login = async ({ username, password }) => {
     }
     return { ok: false, reason: 'server' };
   }
+
+  const claim = await claimDeviceSession({ force });
+  if (claim?.ok === false && claim.blocked) {
+    await supabase.auth.signOut();
+    return {
+      ok: false,
+      reason: 'device_conflict',
+      device_label: claim.device_label,
+      last_seen: claim.last_seen,
+    };
+  }
+
   // Grant the starter pack on first login (idempotent on the server side).
   try {
     await supabase.functions.invoke('grant-starter-pack', { body: {} });
@@ -143,5 +173,7 @@ export const currentSession = () => {
 };
 
 export const logout = async () => {
+  clearStoredSessionId();
+  stopHeartbeat();
   await supabase.auth.signOut();
 };

@@ -61,6 +61,60 @@ describe('authStore.login', () => {
 
     expect(mockInvoke).not.toHaveBeenCalled();
   });
+
+  it('returns device_conflict and signs out when claim is blocked', async () => {
+    mockSignInWithPassword.mockResolvedValue({
+      data: { user: { id: 'u1' }, session: { access_token: 't' } },
+      error: null,
+    });
+    const signOutSpy = vi.fn().mockResolvedValue({});
+    // Re-bind signOut for this case.
+    const supa = (await import('@/lib/supabase')).supabase;
+    supa.auth.signOut = signOutSpy;
+
+    mockInvoke.mockImplementation((name) => {
+      if (name === 'claim-session') {
+        return Promise.resolve({
+          data: { ok: false, blocked: true, device_label: 'Chrome on Windows', last_seen: '2026-04-28T00:00:00Z' },
+          error: null,
+        });
+      }
+      return Promise.resolve({ data: { ok: true }, error: null });
+    });
+
+    const { login } = await import('@/lib/authStore');
+    const res = await login({ username: 'testuser', password: 'pass123' });
+
+    expect(res).toEqual({
+      ok: false,
+      reason: 'device_conflict',
+      device_label: 'Chrome on Windows',
+      last_seen: '2026-04-28T00:00:00Z',
+    });
+    expect(signOutSpy).toHaveBeenCalled();
+  });
+
+  it('passes force=true through to claim-session on takeover', async () => {
+    mockSignInWithPassword.mockResolvedValue({
+      data: { user: { id: 'u1' }, session: { access_token: 't' } },
+      error: null,
+    });
+    mockInvoke.mockImplementation((name, opts) => {
+      if (name === 'claim-session') {
+        expect(opts.body.force).toBe(true);
+        return Promise.resolve({
+          data: { ok: true, exempt: false, session_id: 'sid-2' },
+          error: null,
+        });
+      }
+      return Promise.resolve({ data: { ok: true }, error: null });
+    });
+
+    const { login } = await import('@/lib/authStore');
+    const res = await login({ username: 'testuser', password: 'pass123', force: true });
+
+    expect(res.ok).toBe(true);
+  });
 });
 
 // ---------------------------------------------------------------------------
