@@ -11,8 +11,11 @@ Deno.serve(async (req) => {
     return json({ ok: false, reason: 'method_not_allowed' }, 405);
   }
 
-  const authHeader = req.headers.get('Authorization') ?? '';
-  const userJwt = authHeader.replace(/^Bearer\s+/i, '').trim();
+  const authHeader = req.headers.get('Authorization');
+  if (!authHeader?.startsWith('Bearer ')) {
+    return json({ ok: false, reason: 'unauthorized' }, 401);
+  }
+  const userJwt = authHeader.slice(7).trim();
   if (!userJwt) return json({ ok: false, reason: 'unauthorized' }, 401);
 
   let body: { device_label?: string; force?: boolean };
