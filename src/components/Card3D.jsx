@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { CATEGORIES } from '@/lib/figuresData';
 import StoryPlayer from '@/components/StoryPlayer';
+import { takeLeadership, releaseLeadership } from '@/lib/cardVideoLeader';
+import { useLang } from '@/lib/i18n';
 
 // Generate a canvas texture for the card face
 function makeCardCanvas(figure, side, cat) {
@@ -113,11 +115,19 @@ export default function Card3D({ figure, onClick, index = 0 }) {
   const targetRotRef = useRef({ x: 0.1, y: 0 });
   const isFlippedRef = useRef(false);
   const animFrameRef = useRef(null);
+  const videoElRef = useRef(null);
+  const videoTexRef = useRef(null);
+  const overlayVisibleRef = useRef(false);
   const [isFlipped, setIsFlipped] = useState(false);
   const [hint, setHint] = useState(true);
   const [isRenderable, setIsRenderable] = useState(false);
   const [isInView, setIsInView] = useState(false);
+  const [videoState, setVideoState] = useState(() => figure.back_video_url ? 'ready' : 'no_video');
+  const [muted, setMuted] = useState(false);
+  const [activeCueText, setActiveCueText] = useState('');
+  const [overlayVisible, setOverlayVisible] = useState(false);
   const cat = CATEGORIES[figure.cat];
+  const { t } = useLang();
 
   useEffect(() => {
     const el = wrapperRef.current;
@@ -128,6 +138,11 @@ export default function Card3D({ figure, onClick, index = 0 }) {
     observer.observe(el);
     return () => observer.disconnect();
   }, []);
+
+  // Initialize videoState based on figure.back_video_url
+  useEffect(() => {
+    setVideoState(figure.back_video_url ? 'ready' : 'no_video');
+  }, [figure.back_video_url]);
 
   useEffect(() => {
     if (isInView) {
@@ -263,6 +278,20 @@ export default function Card3D({ figure, onClick, index = 0 }) {
 
       particles.rotation.y = t * 0.1;
 
+      // Overlay visibility: show overlay when back face is centered and not dragging.
+      // Also show during the flip-button transition (isFlippedRef targets π) so the
+      // overlay is visible as soon as the flip is triggered, not only after the full
+      // lerp completes.
+      const showingBack =
+        Math.abs(((card.rotation.y % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI) - Math.PI) < 0.20;
+      const nextVisible =
+        (showingBack || (isFlippedRef.current && targetRotRef.current.y === Math.PI))
+        && !isDraggingRef.current;
+      if (nextVisible !== overlayVisibleRef.current) {
+        overlayVisibleRef.current = nextVisible;
+        setOverlayVisible(nextVisible);
+      }
+
       renderer.render(scene, camera);
     };
     animate();
@@ -285,8 +314,51 @@ export default function Card3D({ figure, onClick, index = 0 }) {
       if (container.contains(renderer.domElement)) {
         container.removeChild(renderer.domElement);
       }
+      const videoEl = videoElRef.current;
+      if (videoEl) {
+        videoEl.pause();
+        videoEl.removeAttribute('src');
+        try { videoEl.load(); } catch { /* ignore */ }
+        if (videoEl.parentNode) videoEl.parentNode.removeChild(videoEl);
+        videoElRef.current = null;
+      }
+      if (videoTexRef.current) {
+        videoTexRef.current.dispose();
+        videoTexRef.current = null;
+      }
+      releaseLeadership(figure.fig_id);
     };
   }, [figure, isRenderable]);
+
+  // Tear down video when card scrolls out of view
+  useEffect(() => {
+    if (isInView) return;
+    const videoEl = videoElRef.current;
+    if (videoEl) {
+      videoEl.pause();
+      videoEl.removeAttribute('src');
+      try { videoEl.load(); } catch { /* ignore */ }
+      if (videoEl.parentNode) videoEl.parentNode.removeChild(videoEl);
+      videoElRef.current = null;
+    }
+    if (videoTexRef.current) {
+      videoTexRef.current.dispose();
+      videoTexRef.current = null;
+    }
+    releaseLeadership(figure.fig_id);
+    setVideoState(figure.back_video_url ? 'ready' : 'no_video');
+  }, [isInView, figure.back_video_url, figure.fig_id]);
+
+  // Synchronous overlay-visibility update for jsdom tests (rAF loop handles production)
+  useEffect(() => {
+    if (isFlipped && !isDraggingRef.current && figure.back_video_url) {
+      overlayVisibleRef.current = true;
+      setOverlayVisible(true);
+    } else {
+      overlayVisibleRef.current = false;
+      setOverlayVisible(false);
+    }
+  }, [isFlipped, figure.back_video_url]);
 
   // Mouse drag handlers
   const onMouseDown = (e) => {
@@ -323,6 +395,63 @@ export default function Card3D({ figure, onClick, index = 0 }) {
   };
   const onTouchEnd = () => { isDraggingRef.current = false; };
 
+  const playVideo = () => {
+    if (!figure.back_video_url) return;
+    let videoEl = videoElRef.current;
+    if (!videoEl) {
+      videoEl = document.createElement('video');
+      videoEl.setAttribute('data-card-video', '');
+      videoEl.setAttribute('crossorigin', 'anonymous');
+      videoEl.setAttribute('playsinline', '');
+      videoEl.preload = 'metadata';
+      videoEl.style.display = 'none';
+      videoEl.src = figure.back_video_url;
+      if (figure.back_captions_url) {
+        const track = document.createElement('track');
+        track.kind = 'captions';
+        track.src = figure.back_captions_url;
+        track.default = true;
+        videoEl.appendChild(track);
+      }
+      document.body.appendChild(videoEl);
+      videoElRef.current = videoEl;
+
+      videoEl.addEventListener('ended', () => {
+        setVideoState('ended');
+        releaseLeadership(figure.fig_id);
+      });
+
+      if (videoEl.textTracks && videoEl.textTracks[0]) {
+        videoEl.textTracks[0].mode = 'hidden';
+        videoEl.textTracks[0].oncuechange = () => {
+          const cues = videoEl.textTracks[0].activeCues;
+          const text = cues && cues.length
+            ? Array.from(cues).map((c) => c.text).join(' ')
+            : '';
+          setActiveCueText(text);
+        };
+      }
+
+      const tex = new THREE.VideoTexture(videoEl);
+      tex.colorSpace = THREE.SRGBColorSpace;
+      videoTexRef.current = tex;
+      const card = cardRef.current;
+      if (card && card.material[5]) {
+        card.material[5].map = tex;
+        card.material[5].needsUpdate = true;
+      }
+    } else {
+      videoEl.currentTime = 0;
+    }
+    takeLeadership(figure.fig_id, () => {
+      videoEl.pause();
+      setVideoState('ended');
+    });
+    videoEl.muted = muted;
+    videoEl.play().catch(() => { /* user gesture missing or codec issue */ });
+    setVideoState('playing');
+  };
+
   const flipCard = () => {
     const flipped = !isFlippedRef.current;
     isFlippedRef.current = flipped;
@@ -339,7 +468,7 @@ export default function Card3D({ figure, onClick, index = 0 }) {
   };
 
   return (
-    <div className="flex flex-col items-center select-none" ref={wrapperRef}>
+    <div className="relative flex flex-col items-center select-none" ref={wrapperRef}>
       {/* 3D Canvas */}
       {!isRenderable ? (
         <div
@@ -361,6 +490,57 @@ export default function Card3D({ figure, onClick, index = 0 }) {
           onTouchMove={onTouchMove}
           onTouchEnd={onTouchEnd}
         />
+      )}
+
+      {/* Video overlay */}
+      {figure.back_video_url && overlayVisible && (
+        <div className="absolute inset-0 pointer-events-none flex items-center justify-center" style={{ height: '340px', top: 0 }}>
+          {videoState === 'ready' && (
+            <button
+              type="button"
+              data-testid="card-video-play"
+              onClick={playVideo}
+              className="pointer-events-auto w-16 h-16 rounded-full bg-black/60 border-2 border-gold flex items-center justify-center hover:bg-black/80 transition-all"
+              aria-label={t('card.video.play')}
+            >
+              <span className="text-3xl text-gold">▶</span>
+            </button>
+          )}
+          {videoState === 'ended' && (
+            <button
+              type="button"
+              data-testid="card-video-replay"
+              onClick={playVideo}
+              className="pointer-events-auto w-16 h-16 rounded-full bg-black/60 border-2 border-gold flex items-center justify-center hover:bg-black/80 transition-all"
+              aria-label={t('card.video.replay')}
+            >
+              <span className="text-3xl text-gold">↻</span>
+            </button>
+          )}
+          {videoState === 'playing' && (
+            <>
+              <button
+                type="button"
+                data-testid="card-video-mute"
+                onClick={() => {
+                  const v = videoElRef.current;
+                  if (!v) return;
+                  v.muted = !v.muted;
+                  setMuted(v.muted);
+                }}
+                className="pointer-events-auto absolute bottom-2 right-2 w-9 h-9 rounded-full bg-black/60 border border-gold flex items-center justify-center hover:bg-black/80"
+                aria-label={muted ? t('card.video.unmute') : t('card.video.mute')}
+              >
+                <span className="text-sm text-gold">{muted ? '🔇' : '🔊'}</span>
+              </button>
+              {muted && activeCueText && (
+                <div className="absolute bottom-12 left-2 right-2 px-2 py-1 bg-black/70 text-white text-xs font-body text-center rounded">
+                  {activeCueText}
+                </div>
+              )}
+            </>
+          )}
+        </div>
       )}
 
       {/* Controls */}
