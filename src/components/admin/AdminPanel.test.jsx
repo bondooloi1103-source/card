@@ -34,6 +34,14 @@ vi.mock('@/hooks/useAppSettings', () => ({
   useAppSettings: () => ({ settings: { site_name: '', site_logo: '' }, saveSetting: vi.fn() }),
 }));
 
+vi.mock('@/hooks/useFigureBackVideos', () => ({
+  useFigureBackVideos: () => ({ data: {}, refetch: vi.fn() }),
+}));
+
+vi.mock('@/components/admin/BackVideos', () => ({
+  default: () => null,
+}));
+
 vi.mock('@/lib/authStore', () => ({
   listInviteCodes: vi.fn().mockResolvedValue([]),
   createInviteCode: vi.fn(),

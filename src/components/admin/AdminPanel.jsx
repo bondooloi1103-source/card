@@ -15,6 +15,8 @@ import AdminTournaments from '@/components/admin/Tournaments';
 import AdminVoices from '@/components/admin/Voices';
 import StoryEditorModal from '@/components/admin/StoryEditorModal';
 import AdminEras from '@/components/admin/Eras';
+import BackVideos from '@/components/admin/BackVideos';
+import { useFigureBackVideos } from '@/hooks/useFigureBackVideos';
 import { base44 } from '@/api/base44Client';
 import { useAppSettings } from '@/hooks/useAppSettings';
 import { listInviteCodes, createInviteCode, deleteInviteCode, listAccounts } from '@/lib/authStore';
@@ -37,6 +39,7 @@ export default function AdminPanel({ figures, onClose, onFiguresChange }) {
   const [logs, setLogs] = useState([]);
   const [sessionStart] = useState(Date.now());
   const { settings, saveSetting } = useAppSettings();
+  const { data: videosById, refetch: refetchVideos } = useFigureBackVideos();
   const [brandForm, setBrandForm] = useState({ site_name: '', site_logo: '' });
 
   // Sync brandForm when settings load
@@ -300,6 +303,9 @@ export default function AdminPanel({ figures, onClose, onFiguresChange }) {
           </TabsTrigger>
           <TabsTrigger value="eras" className="gap-1.5 text-xs font-body">
             📖 Бүлэг
+          </TabsTrigger>
+          <TabsTrigger value="back-videos" className="gap-1.5 text-xs font-body">
+            🎬 Видео
           </TabsTrigger>
         </TabsList>
 
@@ -707,6 +713,15 @@ export default function AdminPanel({ figures, onClose, onFiguresChange }) {
         {/* Eras */}
         <TabsContent value="eras" className="flex-1 overflow-auto p-6">
           <AdminEras onToast={showToast} />
+        </TabsContent>
+
+        {/* Back Videos */}
+        <TabsContent value="back-videos" className="flex-1 overflow-auto p-6">
+          <BackVideos
+            figures={figures}
+            videosById={videosById ?? {}}
+            onChange={() => refetchVideos()}
+          />
         </TabsContent>
 
       </Tabs>
