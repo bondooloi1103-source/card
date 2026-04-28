@@ -122,6 +122,7 @@ export default function Card3D({ figure, onClick, index = 0 }) {
   const [hint, setHint] = useState(true);
   const [isRenderable, setIsRenderable] = useState(false);
   const [isInView, setIsInView] = useState(false);
+  const [isMostlyInView, setIsMostlyInView] = useState(false);
   const [videoState, setVideoState] = useState(() => figure.back_video_url ? 'ready' : 'no_video');
   const [muted, setMuted] = useState(false);
   const [activeCueText, setActiveCueText] = useState('');
@@ -134,7 +135,8 @@ export default function Card3D({ figure, onClick, index = 0 }) {
     if (!el) return;
     const observer = new IntersectionObserver(([entry]) => {
       setIsInView(entry.isIntersecting);
-    }, { rootMargin: '100px' });
+      setIsMostlyInView(entry.intersectionRatio >= 0.3);
+    }, { rootMargin: '100px', threshold: [0, 0.3] });
     observer.observe(el);
     return () => observer.disconnect();
   }, []);
@@ -279,14 +281,9 @@ export default function Card3D({ figure, onClick, index = 0 }) {
       particles.rotation.y = t * 0.1;
 
       // Overlay visibility: show overlay when back face is centered and not dragging.
-      // Also show during the flip-button transition (isFlippedRef targets π) so the
-      // overlay is visible as soon as the flip is triggered, not only after the full
-      // lerp completes.
       const showingBack =
         Math.abs(((card.rotation.y % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI) - Math.PI) < 0.20;
-      const nextVisible =
-        (showingBack || (isFlippedRef.current && targetRotRef.current.y === Math.PI))
-        && !isDraggingRef.current;
+      const nextVisible = showingBack && !isDraggingRef.current;
       if (nextVisible !== overlayVisibleRef.current) {
         overlayVisibleRef.current = nextVisible;
         setOverlayVisible(nextVisible);
@@ -330,9 +327,9 @@ export default function Card3D({ figure, onClick, index = 0 }) {
     };
   }, [figure, isRenderable]);
 
-  // Tear down video when card scrolls out of view
+  // Tear down video when card scrolls mostly out of view (< 30% visible)
   useEffect(() => {
-    if (isInView) return;
+    if (isMostlyInView) return;
     const videoEl = videoElRef.current;
     if (videoEl) {
       videoEl.pause();
@@ -347,18 +344,7 @@ export default function Card3D({ figure, onClick, index = 0 }) {
     }
     releaseLeadership(figure.fig_id);
     setVideoState(figure.back_video_url ? 'ready' : 'no_video');
-  }, [isInView, figure.back_video_url, figure.fig_id]);
-
-  // Synchronous overlay-visibility update for jsdom tests (rAF loop handles production)
-  useEffect(() => {
-    if (isFlipped && !isDraggingRef.current && figure.back_video_url) {
-      overlayVisibleRef.current = true;
-      setOverlayVisible(true);
-    } else {
-      overlayVisibleRef.current = false;
-      setOverlayVisible(false);
-    }
-  }, [isFlipped, figure.back_video_url]);
+  }, [isMostlyInView, figure.back_video_url, figure.fig_id]);
 
   // Mouse drag handlers
   const onMouseDown = (e) => {

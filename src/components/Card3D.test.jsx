@@ -54,9 +54,19 @@ beforeEach(() => {
     disconnect() {}
   };
 
-  // Prevent the rAF animation loop from firing in jsdom and overriding
-  // the isFlipped-effect's setOverlayVisible(true) before tests can act.
-  global.requestAnimationFrame = vi.fn(() => 0);
+  // Drive the rAF loop enough ticks so the lerp can reach Math.PI (showingBack threshold).
+  // MAX_RAF = 100 gives the lerp (factor 0.08) ~100 frames to drive rotation.y toward π.
+  let rafId = 0;
+  let rafCount = 0;
+  const MAX_RAF = 100;
+  global.requestAnimationFrame = (cb) => {
+    if (rafCount++ > MAX_RAF) return 0;
+    const id = ++rafId;
+    Promise.resolve().then(() => {
+      try { cb(performance.now()); } catch { /* ignore */ }
+    });
+    return id;
+  };
   global.cancelAnimationFrame = vi.fn();
 
   // Stub canvas 2d context so makeCardCanvas doesn't throw in jsdom
