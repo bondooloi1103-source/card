@@ -1,5 +1,11 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
+import {
+  getStoredSessionId,
+  startHeartbeat,
+  stopHeartbeat,
+  onEvicted,
+} from '@/lib/deviceSession';
 
 const AuthContext = createContext();
 
@@ -12,7 +18,13 @@ export const AuthProvider = ({ children }) => {
   const [appPublicSettings, setAppPublicSettings] = useState(null);
 
   useEffect(() => {
+    onEvicted(() => {
+      // Heartbeat already cleared local session_id and called supabase.signOut.
+      // Surface the eviction to the user via the login screen banner.
+      window.location.replace('/otp?reason=signed_in_elsewhere');
+    });
     checkAppState();
+    return () => stopHeartbeat();
   }, []);
 
   const checkAppState = async () => {
@@ -29,6 +41,11 @@ export const AuthProvider = ({ children }) => {
       const currentUser = await base44.auth.me();
       setUser(currentUser);
       setIsAuthenticated(!!currentUser);
+      // If the user is signed in and we have a stored session_id, resume the
+      // heartbeat (e.g., after a page reload).
+      if (currentUser && getStoredSessionId()) {
+        startHeartbeat();
+      }
     } catch (error) {
       console.error('User auth check failed:', error);
       setIsAuthenticated(false);
