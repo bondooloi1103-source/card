@@ -2,6 +2,8 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useLang } from '@/lib/i18n';
 import { useFigureARTarget } from '@/hooks/useFigureARTarget';
+import BrassButton from '@/components/ornaments/BrassButton';
+import CornerTicks from '@/components/ornaments/CornerTicks';
 
 function ARGlyph({ size = 16 }) {
   return (
@@ -32,8 +34,8 @@ export default function ARLaunchButton({ figId, variant = 'full' }) {
         data-testid="ar-launch-loading"
         className={
           variant === 'compact'
-            ? 'inline-block w-8 h-8 rounded-full border border-gold/40 animate-pulse'
-            : 'inline-flex items-center gap-2 px-4 py-2 border border-gold/40 rounded animate-pulse text-gold/60 text-xs font-meta tracking-[0.2em] uppercase'
+            ? 'relative inline-block w-9 h-9 border border-brass/40 animate-pulse'
+            : 'inline-flex items-center gap-2 px-6 py-3 border border-brass/40 animate-pulse text-brass/60 text-[11px] font-meta tracking-[0.28em] uppercase'
         }
       >
         {variant === 'compact' ? '' : t('ar.loading')}
@@ -55,52 +57,49 @@ export default function ARLaunchButton({ figId, variant = 'full' }) {
         data-variant="compact"
         aria-label={t('ar.button.full')}
         title={ready ? t('ar.button.full') : t('ar.button.tooltipDisabled')}
-        className={`relative w-8 h-8 rounded-full flex items-center justify-center
+        className={`relative w-9 h-9 inline-flex items-center justify-center transition-colors
           ${ready
-            ? 'bg-ink/70 text-gold border border-gold/70 hover:scale-110 transition-transform'
-            : 'bg-ink/40 text-bronze/50 border border-bronze/30 cursor-not-allowed'}`}
-        style={{ minWidth: 44, minHeight: 44, padding: 0 }}
+            ? 'bg-ink/70 text-seal hover:text-ivory'
+            : 'bg-ink/40 text-bronze/50 cursor-not-allowed'}`}
+        style={{ minWidth: 44, minHeight: 44 }}
       >
+        <span
+          aria-hidden
+          className={`absolute inset-0 border ${ready ? 'border-brass/70' : 'border-bronze/30'}`}
+        />
+        <CornerTicks size={5} inset={1} thickness={1} opacity={ready ? 0.95 : 0.5} />
         {ready && (
           <motion.span
             aria-hidden
-            className="absolute inset-0 rounded-full border border-gold/70 motion-safe:animate-[arPulse_2.4s_ease-out_infinite]"
+            className="absolute inset-0 border border-seal/60 motion-safe:animate-[arPulse_2.4s_ease-out_infinite]"
           />
         )}
-        <ARGlyph size={14} />
+        <span className="relative z-10 inline-flex">
+          <ARGlyph size={14} />
+        </span>
       </button>
     );
   }
 
-  // full variant — distinct from crimson/brass action buttons
+  // full variant — BrassButton (primary seal-filled when ready, ghost when not)
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      disabled={!ready}
-      data-variant="full"
-      className={`relative inline-flex items-center gap-2 px-4 py-2 font-meta text-[10px] tracking-[0.28em] uppercase
-        ${ready
-          ? 'text-gold hover:text-ivory transition-colors'
-          : 'text-bronze/60 cursor-not-allowed'}`}
-    >
-      <span
-        aria-hidden
-        className={`absolute inset-0 border ${ready ? 'border-gold/70' : 'border-bronze/40'}`}
-        style={{ background: ready
-          ? 'linear-gradient(135deg, rgba(212,175,55,0.08), rgba(184,134,11,0.04))'
-          : 'transparent' }}
-      />
+    <span className="relative inline-flex" data-variant="full">
+      <BrassButton
+        type="button"
+        onClick={onClick}
+        disabled={!ready}
+        variant={ready ? 'primary' : 'ghost'}
+        size="sm"
+        icon={<ARGlyph size={14} />}
+      >
+        {ready ? t('ar.button.full') : t('ar.button.comingSoon')}
+      </BrassButton>
       {ready && (
         <motion.span
           aria-hidden
-          className="absolute inset-0 border border-gold/40 motion-safe:animate-[arPulse_2.4s_ease-out_infinite]"
+          className="pointer-events-none absolute inset-0 border border-brass/50 motion-safe:animate-[arPulse_2.4s_ease-out_infinite]"
         />
       )}
-      <span className="relative z-10 inline-flex items-center gap-2">
-        <ARGlyph size={14} />
-        {ready ? t('ar.button.full') : t('ar.button.comingSoon')}
-      </span>
-    </button>
+    </span>
   );
 }
