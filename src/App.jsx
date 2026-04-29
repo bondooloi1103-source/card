@@ -1,8 +1,11 @@
+import { lazy, Suspense } from 'react';
 import { Toaster as ShadcnToaster } from "@/components/ui/toaster"
 import { Toast as FeedbackToastRegistrar, Toaster as HotToaster } from "@/lib/feedback"
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClientInstance } from '@/lib/query-client'
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
+
+const ARView = lazy(() => import('@/pages/ARView'));
 import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import { LangProvider } from '@/lib/i18n';
@@ -76,6 +79,20 @@ const AuthenticatedApp = () => {
       <Route path="/leaderboard" element={<OtpGate><Leaderboard /></OtpGate>} />
       <Route path="/app/tournaments" element={<OtpGate><Tournaments /></OtpGate>} />
       <Route path="/app/tournaments/:id" element={<OtpGate><TournamentDetail /></OtpGate>} />
+      <Route
+        path="/ar/:figId"
+        element={
+          <OtpGate>
+            <Suspense fallback={
+              <div className="fixed inset-0 bg-ink flex items-center justify-center">
+                <div className="w-8 h-8 border-2 border-muted-foreground/20 border-t-crimson rounded-full animate-spin" />
+              </div>
+            }>
+              <ARView />
+            </Suspense>
+          </OtpGate>
+        }
+      />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
