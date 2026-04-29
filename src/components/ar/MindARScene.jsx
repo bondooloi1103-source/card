@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
-import { ArrowLeft, Volume2, VolumeX } from 'lucide-react';
+import { ArrowLeft, Volume2, VolumeX, Headphones, StopCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useLang } from '@/lib/i18n';
+import { useNarration } from '@/hooks/useNarration';
 
 const FRAMING_HINT_MS = 15000;
 const SLOW_VIDEO_MS = 8000;
@@ -11,12 +12,15 @@ export default function MindARScene({
   figureName,
   videoUrl,
   targetUrl,
+  voiceText = '',
+  lang = 'mn',
   storyChapter,
   onError,
 }) {
   const containerRef = useRef(null);
   const navigate = useNavigate();
   const { t } = useLang();
+  const narration = useNarration({ text: voiceText, lang, useSpeak: true });
   const [muted, setMuted] = useState(true);
   const [tracking, setTracking] = useState(false);
   const [showHint, setShowHint] = useState(false);
@@ -150,7 +154,24 @@ export default function MindARScene({
         >
           {t('ar.action.askAi')}
         </button>
+        {voiceText && (
+          <button
+            type="button"
+            data-testid="ar-voice-button"
+            onClick={() => (narration.status === 'playing' ? narration.stop() : narration.play())}
+            aria-label={narration.status === 'playing' ? t('ar.action.voiceStop') : t('ar.action.voice')}
+            className="px-4 py-2 border border-brass/60 text-ivory text-xs font-meta tracking-[0.24em] uppercase inline-flex items-center gap-2"
+          >
+            {narration.status === 'playing' ? (
+              <StopCircle className="w-4 h-4" />
+            ) : (
+              <Headphones className="w-4 h-4" />
+            )}
+            {narration.status === 'playing' ? t('ar.action.voiceStop') : t('ar.action.voice')}
+          </button>
+        )}
       </div>
+      <audio {...narration.audioProps} />
     </div>
   );
 }

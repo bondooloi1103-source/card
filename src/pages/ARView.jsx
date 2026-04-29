@@ -4,6 +4,7 @@ import { useLang } from '@/lib/i18n';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useFigureARTarget } from '@/hooks/useFigureARTarget';
 import { FIGURES } from '@/lib/figuresData';
+import { figureBio } from '@/lib/i18n';
 import MindARScene from '@/components/ar/MindARScene';
 import DesktopFallback from '@/components/ar/DesktopFallback';
 import BrandHeader from '@/components/ornaments/BrandHeader';
@@ -46,7 +47,7 @@ function ErrorPanel({ titleKey, bodyKey, onBack, onRetry, retryLabelKey }) {
 export default function ARView() {
   const { figId } = useParams();
   const navigate = useNavigate();
-  const { t } = useLang();
+  const { t, lang } = useLang();
   const isMobile = useIsMobile();
   const { ready, loading, videoUrl, targetUrl } = useFigureARTarget(figId);
   const [arError, setArError] = useState(null);
@@ -54,6 +55,7 @@ export default function ARView() {
   const id = Number(figId);
   const figure = FIGURES.find((f) => f.fig_id === id);
   const figureName = figure?.name ?? '';
+  const voiceText = figure ? figureBio(figure, lang) : '';
 
   if (loading) {
     return (
@@ -121,6 +123,8 @@ export default function ARView() {
       figureName={figureName}
       videoUrl={videoUrl}
       targetUrl={targetUrl}
+      voiceText={voiceText}
+      lang={lang}
       storyChapter={FIGURE_TO_CHAPTER[id]}
       onError={handleArError}
     />

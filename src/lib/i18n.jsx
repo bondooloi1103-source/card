@@ -401,6 +401,8 @@ export const STRINGS = {
   'ar.action.story':          { mn: 'Түүх',                                  en: 'Story' },
   'ar.action.quiz':           { mn: 'Шалгуур',                               en: 'Quiz' },
   'ar.action.askAi':          { mn: 'AI асуу',                               en: 'Ask AI' },
+  'ar.action.voice':          { mn: 'Дуу',                                   en: 'Voice' },
+  'ar.action.voiceStop':      { mn: 'Зогс',                                  en: 'Stop' },
   'ar.hint.framing':          { mn: 'Картыг камерын дунд аваачиж, гэрэлтэй газар барина уу', en: 'Hold the card centered in the camera in good light' },
   'ar.error.permission':      { mn: 'Камер-р хандах эрх олгоно уу',          en: 'Please allow camera access' },
   'ar.error.permission.retry':{ mn: 'Дахин оролдох',                         en: 'Try again' },
