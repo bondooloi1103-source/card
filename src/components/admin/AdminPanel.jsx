@@ -18,6 +18,7 @@ import AdminEras from '@/components/admin/Eras';
 import BackVideos from '@/components/admin/BackVideos';
 import ARTargetUploader from '@/components/admin/ARTargetUploader';
 import ModelUploader from '@/components/admin/ModelUploader';
+import ARPackUploader from '@/components/admin/ARPackUploader';
 import { useFigureBackVideos } from '@/hooks/useFigureBackVideos';
 import { base44 } from '@/api/base44Client';
 import { useAppSettings } from '@/hooks/useAppSettings';
@@ -314,6 +315,9 @@ export default function AdminPanel({ figures, onClose, onFiguresChange }) {
           </TabsTrigger>
           <TabsTrigger value="models" className="gap-1.5 text-xs font-body">
             🎭 3D
+          </TabsTrigger>
+          <TabsTrigger value="ar-pack" className="gap-1.5 text-xs font-body">
+            📦 AR Pack
           </TabsTrigger>
         </TabsList>
 
@@ -748,6 +752,11 @@ export default function AdminPanel({ figures, onClose, onFiguresChange }) {
             videosById={videosById ?? {}}
             onChange={() => refetchVideos()}
           />
+        </TabsContent>
+
+        {/* AR Pack (multi-target combined .mind) */}
+        <TabsContent value="ar-pack" className="flex-1 overflow-auto p-6">
+          <ARPackUploader />
         </TabsContent>
 
       </Tabs>
