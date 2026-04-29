@@ -17,6 +17,7 @@ import StoryEditorModal from '@/components/admin/StoryEditorModal';
 import AdminEras from '@/components/admin/Eras';
 import BackVideos from '@/components/admin/BackVideos';
 import ARTargetUploader from '@/components/admin/ARTargetUploader';
+import ModelUploader from '@/components/admin/ModelUploader';
 import { useFigureBackVideos } from '@/hooks/useFigureBackVideos';
 import { base44 } from '@/api/base44Client';
 import { useAppSettings } from '@/hooks/useAppSettings';
@@ -310,6 +311,9 @@ export default function AdminPanel({ figures, onClose, onFiguresChange }) {
           </TabsTrigger>
           <TabsTrigger value="ar-targets" className="gap-1.5 text-xs font-body">
             🎯 AR
+          </TabsTrigger>
+          <TabsTrigger value="models" className="gap-1.5 text-xs font-body">
+            🎭 3D
           </TabsTrigger>
         </TabsList>
 
@@ -731,6 +735,15 @@ export default function AdminPanel({ figures, onClose, onFiguresChange }) {
         {/* AR Targets */}
         <TabsContent value="ar-targets" className="flex-1 overflow-auto p-6">
           <ARTargetUploader
+            figures={figures}
+            videosById={videosById ?? {}}
+            onChange={() => refetchVideos()}
+          />
+        </TabsContent>
+
+        {/* 3D Models */}
+        <TabsContent value="models" className="flex-1 overflow-auto p-6">
+          <ModelUploader
             figures={figures}
             videosById={videosById ?? {}}
             onChange={() => refetchVideos()}

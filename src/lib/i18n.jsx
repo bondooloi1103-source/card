@@ -426,6 +426,16 @@ export const STRINGS = {
   'admin.arTargets.replaceWarn':  { mn: 'Хуучин AR файл устах болно. Үргэлжлүүлэх үү?', en: 'The previous AR target will be deleted. Continue?' },
   'admin.arTargets.tooBig':   { mn: '.mind файл хэт том ({mb} MB > 5 MB)',    en: 'File too large ({mb} MB > 5 MB)' },
   'admin.arTargets.notMind':  { mn: '.mind өргөтгөлтэй файл байх ёстой',     en: 'File must have a .mind extension' },
+  'admin.models.tab':         { mn: '3D',                                    en: '3D' },
+  'admin.models.upload':      { mn: '.glb хуулах',                           en: 'Upload .glb' },
+  'admin.models.replace':     { mn: 'Солих',                                 en: 'Replace' },
+  'admin.models.delete':      { mn: 'Устгах',                                en: 'Delete' },
+  'admin.models.help':        { mn: '3D загвар (.glb эсвэл .gltf, 20MB хүртэл) хуулна уу. Загвар нь карт дээр AR-р харагдана. Видео мөн хуулсан байх шаардлагатай.', en: 'Upload a 3D model (.glb or .gltf, up to 20MB). The model will be projected onto the card in AR. A video must already be uploaded for this figure.' },
+  'admin.models.empty':       { mn: '3D загвар байхгүй',                     en: 'No 3D model' },
+  'admin.models.noVideoFirst':{ mn: 'Видео хуулсны дараа боломжтой',         en: 'Upload video first' },
+  'admin.models.replaceWarn': { mn: 'Хуучин 3D загвар устах болно. Үргэлжлүүлэх үү?', en: 'The previous 3D model will be deleted. Continue?' },
+  'admin.models.tooBig':      { mn: '.glb файл хэт том ({mb} MB > 20 MB)',    en: 'File too large ({mb} MB > 20 MB)' },
+  'admin.models.notGlb':      { mn: '.glb эсвэл .gltf өргөтгөлтэй файл байх ёстой', en: 'File must have a .glb or .gltf extension' },
 };
 
 const LangContext = createContext({ lang: 'mn', setLang: () => {}, t: (k, v) => {
