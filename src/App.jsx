@@ -6,6 +6,7 @@ import { queryClientInstance } from '@/lib/query-client'
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 
 const ARView = lazy(() => import('@/pages/ARView'));
+const ARQueryRedirect = lazy(() => import('@/pages/ARQueryRedirect'));
 import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import { LangProvider } from '@/lib/i18n';
@@ -79,6 +80,7 @@ const AuthenticatedApp = () => {
       <Route path="/leaderboard" element={<OtpGate><Leaderboard /></OtpGate>} />
       <Route path="/app/tournaments" element={<OtpGate><Tournaments /></OtpGate>} />
       <Route path="/app/tournaments/:id" element={<OtpGate><TournamentDetail /></OtpGate>} />
+      <Route path="/ar" element={<Suspense fallback={null}><ARQueryRedirect /></Suspense>} />
       <Route
         path="/ar/:figId"
         element={
