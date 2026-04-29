@@ -4,6 +4,7 @@ import { CATEGORIES } from '@/lib/figuresData';
 import StoryPlayer from '@/components/StoryPlayer';
 import { takeLeadership, releaseLeadership } from '@/lib/cardVideoLeader';
 import { useLang } from '@/lib/i18n';
+import ARLaunchButton from '@/components/ARLaunchButton';
 
 // Generate a canvas texture for the card face
 function makeCardCanvas(figure, side, cat) {
@@ -455,6 +456,9 @@ export default function Card3D({ figure, onClick, index = 0 }) {
 
   return (
     <div className="relative flex flex-col items-center select-none" ref={wrapperRef}>
+      <div className="absolute top-2 right-2 z-10">
+        <ARLaunchButton figId={figure.fig_id} variant="compact" />
+      </div>
       {/* 3D Canvas */}
       {!isRenderable ? (
         <div

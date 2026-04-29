@@ -35,6 +35,10 @@ vi.mock('@/components/StoryPlayer', () => ({
   default: () => null,
 }));
 
+vi.mock('@/components/ARLaunchButton', () => ({
+  default: () => null,
+}));
+
 const figureNoVideo = {
   fig_id: 1, cat: 'khans', ico: '👑', card: 'Туз', name: 'Чингис Хаан',
   yrs: '1162-1227', role: 'X', bio: 'Y', achs: [], fact: '', quote: null, qattr: null, rel: [],
