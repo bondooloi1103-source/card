@@ -20,7 +20,7 @@ export function useFigureARTarget(figId) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('figure_back_videos')
-        .select('fig_id, video_path, ar_target_path')
+        .select('fig_id, video_path, ar_target_path, model_path')
         .eq('fig_id', id)
         .maybeSingle();
       if (error) throw error;
@@ -31,12 +31,14 @@ export function useFigureARTarget(figId) {
   const row = query.data;
   const videoUrl = publicUrl(row?.video_path);
   const targetUrl = publicUrl(row?.ar_target_path);
-  const ready = !!(videoUrl && targetUrl);
+  const modelUrl = publicUrl(row?.model_path);
+  const ready = !!(targetUrl && (videoUrl || modelUrl));
 
   return {
     ready,
     videoUrl,
     targetUrl,
+    modelUrl,
     loading: query.isLoading,
     error: query.error ?? null,
   };

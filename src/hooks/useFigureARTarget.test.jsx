@@ -13,15 +13,15 @@ vi.stubEnv('VITE_SUPABASE_URL', 'https://example.supabase.co');
 
 import { useFigureARTarget } from '@/hooks/useFigureARTarget';
 
-function row(video_path, ar_target_path) {
+function row(video_path, ar_target_path, model_path = null) {
   return {
     select: () => ({
       eq: () => ({
         maybeSingle: () =>
           Promise.resolve({
-            data: video_path == null && ar_target_path == null
+            data: video_path == null && ar_target_path == null && model_path == null
               ? null
-              : { fig_id: 1, video_path, ar_target_path },
+              : { fig_id: 1, video_path, ar_target_path, model_path },
             error: null,
           }),
       }),
@@ -71,5 +71,16 @@ describe('useFigureARTarget', () => {
     const { result } = renderHook(() => useFigureARTarget(1), { wrapper: wrap });
     await waitFor(() => expect(result.current.loading).toBe(false));
     expect(result.current.ready).toBe(false);
+  });
+
+  it('exposes modelUrl and counts model+target as ready (no video required)', async () => {
+    mockFrom.mockReturnValue(row(null, '1/target-1.mind', '1/model-1.glb'));
+    const { result } = renderHook(() => useFigureARTarget(1), { wrapper: wrap });
+    await waitFor(() => expect(result.current.loading).toBe(false));
+    expect(result.current.ready).toBe(true);
+    expect(result.current.modelUrl).toBe(
+      'https://example.supabase.co/storage/v1/object/public/figure-videos/1/model-1.glb'
+    );
+    expect(result.current.videoUrl).toBeNull();
   });
 });
