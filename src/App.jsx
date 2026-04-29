@@ -5,8 +5,7 @@ import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClientInstance } from '@/lib/query-client'
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 
-const ARView = lazy(() => import('@/pages/ARView'));
-const ARQueryRedirect = lazy(() => import('@/pages/ARQueryRedirect'));
+const MultiTargetARView = lazy(() => import('@/pages/MultiTargetARView'));
 import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import { LangProvider } from '@/lib/i18n';
@@ -89,21 +88,7 @@ const AuthenticatedApp = () => {
                 <div className="w-8 h-8 border-2 border-muted-foreground/20 border-t-crimson rounded-full animate-spin" />
               </div>
             }>
-              <ARQueryRedirect />
-            </Suspense>
-          </OtpGate>
-        }
-      />
-      <Route
-        path="/ar/:figId"
-        element={
-          <OtpGate>
-            <Suspense fallback={
-              <div className="fixed inset-0 bg-ink flex items-center justify-center">
-                <div className="w-8 h-8 border-2 border-muted-foreground/20 border-t-crimson rounded-full animate-spin" />
-              </div>
-            }>
-              <ARView />
+              <MultiTargetARView />
             </Suspense>
           </OtpGate>
         }
