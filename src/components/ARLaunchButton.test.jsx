@@ -10,8 +10,8 @@ vi.mock('react-router-dom', async () => {
 });
 
 const mockHook = vi.fn();
-vi.mock('@/hooks/useFigureARTarget', () => ({
-  useFigureARTarget: (...a) => mockHook(...a),
+vi.mock('@/hooks/useFigureARPack', () => ({
+  useFigureARPack: (...a) => mockHook(...a),
 }));
 
 import ARLaunchButton from '@/components/ARLaunchButton';
@@ -38,11 +38,11 @@ describe('ARLaunchButton', () => {
     expect(screen.getByTestId('ar-launch-loading')).toBeInTheDocument();
   });
 
-  it('navigates to /ar/:figId when ready and clicked (full)', () => {
+  it('navigates to /ar (multi-target mode) when ready and clicked (full)', () => {
     mockHook.mockReturnValue({ ready: true, loading: false });
     render(ui({ figId: 7, variant: 'full' }));
     fireEvent.click(screen.getByRole('button', { name: /AR харах|View in AR/i }));
-    expect(mockNavigate).toHaveBeenCalledWith('/ar/7');
+    expect(mockNavigate).toHaveBeenCalledWith('/ar');
   });
 
   it('shows coming-soon disabled state when not ready', () => {
@@ -61,6 +61,6 @@ describe('ARLaunchButton', () => {
     const btn = screen.getByRole('button', { name: /AR харах|View in AR/i });
     expect(btn).toHaveAttribute('data-variant', 'compact');
     fireEvent.click(btn);
-    expect(mockNavigate).toHaveBeenCalledWith('/ar/7');
+    expect(mockNavigate).toHaveBeenCalledWith('/ar');
   });
 });

@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useLang } from '@/lib/i18n';
-import { useFigureARTarget } from '@/hooks/useFigureARTarget';
+import { useFigureARPack } from '@/hooks/useFigureARPack';
 import BrassButton from '@/components/ornaments/BrassButton';
 import CornerTicks from '@/components/ornaments/CornerTicks';
 
@@ -23,10 +23,10 @@ function ARGlyph({ size = 16 }) {
   );
 }
 
-export default function ARLaunchButton({ figId, variant = 'full' }) {
+export default function ARLaunchButton({ figId: _figId, variant = 'full' }) {
   const navigate = useNavigate();
   const { t } = useLang();
-  const { ready, loading } = useFigureARTarget(figId);
+  const { ready, loading } = useFigureARPack();
 
   if (loading) {
     return (
@@ -45,7 +45,7 @@ export default function ARLaunchButton({ figId, variant = 'full' }) {
 
   const onClick = () => {
     if (!ready) return;
-    navigate(`/ar/${figId}`);
+    navigate('/ar');
   };
 
   if (variant === 'compact') {
@@ -81,7 +81,6 @@ export default function ARLaunchButton({ figId, variant = 'full' }) {
     );
   }
 
-  // full variant — BrassButton (primary seal-filled when ready, ghost when not)
   return (
     <span className="relative inline-flex" data-variant="full">
       <BrassButton
