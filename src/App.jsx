@@ -30,6 +30,8 @@ import Leaderboard from '@/pages/Leaderboard';
 import Tournaments from '@/pages/Tournaments';
 import TournamentDetail from '@/pages/TournamentDetail';
 import StoryChapter from '@/pages/StoryChapter';
+import GuestJoinPage from '@/pages/GuestJoinPage';
+import ProfileGuestsPage from '@/pages/ProfileGuestsPage';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -77,6 +79,8 @@ const AuthenticatedApp = () => {
       <Route path="/duel/:id" element={<OtpGate><DuelIntro /></OtpGate>} />
       <Route path="/duel/:id/summary" element={<OtpGate><DuelSummary /></OtpGate>} />
       <Route path="/leaderboard" element={<OtpGate><Leaderboard /></OtpGate>} />
+      <Route path="/guest/join" element={<GuestJoinPage />} />
+      <Route path="/profile/guests" element={<OtpGate><ProfileGuestsPage /></OtpGate>} />
       <Route path="/app/tournaments" element={<OtpGate><Tournaments /></OtpGate>} />
       <Route path="/app/tournaments/:id" element={<OtpGate><TournamentDetail /></OtpGate>} />
       <Route

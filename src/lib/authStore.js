@@ -11,6 +11,36 @@ import {
 
 const BOOTSTRAP_CODE = 'ADMIN001';
 
+// Module-scope cache of the parent's display name for the currently signed-in
+// guest. Populated on login/register/claim; cleared on logout. Used by the
+// in-game "+N XP → {parent}" banner.
+let _parentDisplayName = null;
+
+export const isGuest = () => {
+  const s = currentSession();
+  return !!s?.parent_user_id;
+};
+
+export const parentDisplayName = () => _parentDisplayName;
+
+export const setParentDisplayName = (name) => {
+  _parentDisplayName = name ?? null;
+};
+
+// Loads parent_username via the security-definer RPC. Returns null silently
+// for non-guests or RPC failures (the banner just won't render).
+export const refreshParentDisplayName = async () => {
+  try {
+    const { data, error } = await supabase.rpc('select_profile_with_parent');
+    if (error) return null;
+    const row = Array.isArray(data) ? data[0] : data;
+    _parentDisplayName = row?.parent_username ?? null;
+    return _parentDisplayName;
+  } catch {
+    return null;
+  }
+};
+
 // ---------------------------------------------------------------------------
 // Bootstrap hint — returns ADMIN001 only if it hasn't been redeemed yet.
 // ---------------------------------------------------------------------------
@@ -116,6 +146,7 @@ export const registerWithCode = async ({ code, username, password }) => {
       console.warn('grant-starter-pack invoke failed (will retry next login)', err);
     }
 
+    await refreshParentDisplayName();
     return { ok: true, account: { username } };
   } catch {
     return { ok: false, reason: 'server' };
@@ -159,6 +190,7 @@ export const login = async ({ username, password, force = false }) => {
   } catch (err) {
     console.warn('grant-starter-pack invoke failed (will retry next login)', err);
   }
+  await refreshParentDisplayName();
   return { ok: true, account: { username } };
 };
 
@@ -180,6 +212,7 @@ export const currentSession = () => {
       account_id: user.id,
       username: user.user_metadata?.username ?? emailToUsername(user.email) ?? '',
       is_admin: !!user.app_metadata?.is_admin,
+      parent_user_id: user.app_metadata?.parent_user_id ?? null,
       started_at: parsed?.expires_at ? new Date(parsed.expires_at * 1000).toISOString() : null,
     };
   } catch {
@@ -190,5 +223,6 @@ export const currentSession = () => {
 export const logout = async () => {
   clearStoredSessionId();
   stopHeartbeat();
+  _parentDisplayName = null;
   await supabase.auth.signOut();
 };

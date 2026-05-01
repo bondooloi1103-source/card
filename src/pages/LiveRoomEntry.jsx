@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Users, Plus, ArrowLeft } from 'lucide-react';
 import { useLang } from '@/lib/i18n';
+import { isGuest } from '@/lib/authStore';
 import Fleuron from '@/components/ornaments/Fleuron';
 import CornerTicks from '@/components/ornaments/CornerTicks';
 import BrassButton from '@/components/ornaments/BrassButton';
@@ -118,13 +119,17 @@ export default function LiveRoomEntry() {
                 ? 'You choose the round size, timer, and player cap. Share the code; up to 8 can join.'
                 : 'Та асуултын тоо, хугацаа, тоглогчийн хязгаарыг сонго. Кодоор 8 хүртэл хүн нэгдэнэ.'}
             </p>
-            <BrassButton
-              variant="primary"
-              size="md"
-              onClick={() => navigate('/games/quotes/live/new')}
-            >
-              {lang === 'en' ? 'Create a room' : 'Өрөө үүсгэх'}
-            </BrassButton>
+            {isGuest() ? (
+              <p className="text-xs text-ivory/55 italic">{t('guest.cannotHostTooltip')}</p>
+            ) : (
+              <BrassButton
+                variant="primary"
+                size="md"
+                onClick={() => navigate('/games/quotes/live/new')}
+              >
+                {lang === 'en' ? 'Create a room' : 'Өрөө үүсгэх'}
+              </BrassButton>
+            )}
           </div>
         </div>
       </div>

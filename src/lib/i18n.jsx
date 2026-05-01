@@ -418,6 +418,22 @@ export const STRINGS = {
   'admin.arPack.replaceWarn': { mn: 'Хуучин AR багц устах болно. Үргэлжлүүлэх үү?', en: 'The previous AR pack will be deleted. Continue?' },
   'ar.pack.missing.title':    { mn: 'AR багц одоогоор бэлэн биш',             en: 'AR pack not ready yet' },
   'ar.pack.missing.body':     { mn: 'Админ AR багцыг удахгүй хуулах болно.',  en: 'The admin will publish the AR pack soon.' },
+
+  // Guest accounts (5-slot parent → guest model)
+  'guest.panelTitle':          { mn: 'Зочин дансны слот',                      en: 'Guest accounts' },
+  'guest.slotEmpty':           { mn: 'Хоосон',                                 en: 'Empty' },
+  'guest.slotClaimed':         { mn: '{name} нэвтэрсэн',                       en: '{name} signed in' },
+  'guest.generateLinkButton':  { mn: 'Холбоос үүсгэх',                         en: 'Generate link' },
+  'guest.revokeButton':        { mn: 'Цуцлах',                                 en: 'Revoke' },
+  'guest.revokeConfirm':       { mn: 'Цуцлахдаа итгэлтэй байна уу?',           en: 'Revoke this guest?' },
+  'guest.copyUrlLabel':        { mn: 'Энэ холбоосыг найздаа илгээ:',           en: 'Send this link to your friend:' },
+  'guest.expiresIn':           { mn: '{minutes} минутын дараа дуусна',          en: 'Expires in {minutes} minutes' },
+  'guest.joinPageTitle':       { mn: 'Зочноор нэвтэрч байна',                  en: 'Joining as guest' },
+  'guest.joinSuccessToast':    { mn: '{parent}-ийн зочноор нэвтэрлээ',         en: 'Signed in as guest of {parent}' },
+  'guest.joinErrorExpired':    { mn: 'Энэ холбоос дууссан эсвэл ашиглагдсан байна', en: 'This link expired or was already used' },
+  'guest.xpBannerSuffix':      { mn: 'XP {parent}-д очно',                     en: 'XP goes to {parent}' },
+  'guest.cannotHostTooltip':   { mn: 'Зочин өрөө үүсгэх боломжгүй',            en: 'Guests can join rooms but not host' },
+  'guest.cannotRedeemTooltip': { mn: 'Зочин код ашиглах боломжгүй',            en: 'Guests cannot redeem codes' },
 };
 
 const LangContext = createContext({ lang: 'mn', setLang: () => {}, t: (k, v) => {
