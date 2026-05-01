@@ -1,5 +1,6 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.0';
 import { handleOptions, json } from '../_shared/cors.ts';
+import { assertActiveSession, SessionRevokedError } from '../_shared/assertActiveSession.ts';
 
 const STARTER_FIG_IDS = [1, 3, 14] as const;
 
@@ -29,10 +30,21 @@ Deno.serve(async (req) => {
 
   const { data: profile, error: profErr } = await admin
     .from('profiles')
-    .select('starter_granted_at')
+    .select('starter_granted_at, parent_user_id')
     .eq('id', userId)
     .maybeSingle();
   if (profErr) return json({ ok: false, reason: 'db_error' }, 500);
+
+  // Guests don't own cards; never grant a starter pack. Caught by Codex
+  // review 2026-05-01.
+  if (profile?.parent_user_id) return json({ ok: false, reason: 'guests_cannot_receive' }, 403);
+
+  try {
+    await assertActiveSession(admin, userId, req.headers.get('x-session-id'));
+  } catch (e) {
+    if (e instanceof SessionRevokedError) return json({ ok: false, reason: 'session_revoked' }, 401);
+    throw e;
+  }
 
   if (profile?.starter_granted_at) {
     return json({ ok: true, granted: false, reason: 'already_granted' });

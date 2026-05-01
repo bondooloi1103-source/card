@@ -3,6 +3,7 @@ import { handleOptions, json } from '../_shared/cors.ts';
 import { FIGURES } from '../_shared/figures.ts';
 import { currentHourBucket } from '../_shared/ip.ts';
 import { checkAndIncrement } from '../_shared/rate-limit.ts';
+import { assertActiveSession, SessionRevokedError } from '../_shared/assertActiveSession.ts';
 
 const HOURLY_LIMIT = 30;
 const VALID_FIG_IDS = new Set(FIGURES.map((f) => f.fig_id));
@@ -40,6 +41,19 @@ Deno.serve(async (req) => {
   const userId = userData.user.id;
 
   const admin = createClient(supabaseUrl, serviceKey);
+
+  // Guests do not own cards and cannot claim. They get cards transitively
+  // through the parent's collection. Caught by Codex review 2026-05-01.
+  const { data: profGuard } = await admin.from('profiles')
+    .select('parent_user_id').eq('id', userId).maybeSingle();
+  if (profGuard?.parent_user_id) return json({ ok: false, reason: 'guests_cannot_claim' }, 403);
+
+  try {
+    await assertActiveSession(admin, userId, req.headers.get('x-session-id'));
+  } catch (e) {
+    if (e instanceof SessionRevokedError) return json({ ok: false, reason: 'session_revoked' }, 401);
+    throw e;
+  }
 
   // Rate limit keyed on user_id (reusing the rate_limits table; ip_hash column carries user id here).
   const limit = await checkAndIncrement(admin, userId, currentHourBucket(), 'claim-card', HOURLY_LIMIT);

@@ -75,13 +75,14 @@ Deno.serve(async (req) => {
 
   // Single-device claim — evict any prior friend on this slot.
   const sessionId = crypto.randomUUID();
-  await admin.rpc('claim_session_atomic', {
+  const { error: claimErr } = await admin.rpc('claim_session_atomic', {
     p_user_id: auth_user_id,
     p_session_id: sessionId,
     p_device_label: 'guest',
     p_force: true,
     p_stale_seconds: 120,
   });
+  if (claimErr) return json({ ok: false, reason: 'claim_failed' }, 502);
 
   return json({
     ok: true,

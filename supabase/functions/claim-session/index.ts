@@ -31,13 +31,19 @@ Deno.serve(async (req) => {
   if (userErr || !userResp.user) return json({ ok: false, reason: 'unauthorized' }, 401);
   const userId = userResp.user.id;
 
-  // 2. Admin exemption.
+  // 2. Admin exemption + guest block.
+  // Guests are NOT allowed to call claim-session: their session is established
+  // by guest-claim-token (which calls claim_session_atomic internally with
+  // force=true) and re-claiming via this endpoint would let a revoked guest
+  // with a still-valid JWT re-create their active_sessions row, defeating
+  // guest-revoke-slot. Caught by Codex review 2026-05-01.
   const { data: profile, error: profErr } = await admin
     .from('profiles')
-    .select('is_admin')
+    .select('is_admin, parent_user_id')
     .eq('id', userId)
     .maybeSingle();
   if (profErr) return json({ ok: false, reason: 'server' }, 500);
+  if (profile?.parent_user_id) return json({ ok: false, reason: 'guests_cannot_claim_session' }, 403);
   if (profile?.is_admin) return json({ ok: true, exempt: true });
 
   // 3. Atomic claim.
