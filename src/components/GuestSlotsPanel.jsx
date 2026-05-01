@@ -14,8 +14,7 @@ export default function GuestSlotsPanel() {
   const [activeUrl, setActiveUrl] = useState(null);
   const [confirmingIdx, setConfirmingIdx] = useState(null);
   const [error, setError] = useState(null);
-
-  if (isGuest()) return null;
+  const guest = isGuest();
 
   async function refresh() {
     try {
@@ -27,11 +26,14 @@ export default function GuestSlotsPanel() {
   }
 
   useEffect(() => {
+    if (guest) return;
     (async () => {
       try { await initGuestSlots(); } catch { /* idempotent; ignore */ }
       refresh();
     })();
-  }, []);
+  }, [guest]);
+
+  if (guest) return null;
 
   async function onGenerate(slot_idx) {
     setError(null);
