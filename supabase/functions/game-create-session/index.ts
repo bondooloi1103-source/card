@@ -85,6 +85,14 @@ Deno.serve(async (req) => {
     throw e;
   }
 
+  // Block guests from hosting live_room or tournament. Guests can still
+  // join (via game-live-event) and play solo, just not create.
+  if (mode === 'live_room' || mode === 'tournament') {
+    const { data: prof } = await admin.from('profiles')
+      .select('parent_user_id').eq('id', userId).maybeSingle();
+    if (prof?.parent_user_id) return json({ ok: false, reason: 'guests_cannot_host' }, 403);
+  }
+
   // --- Seed resolution ---
   let seed = randSeed();
   let tournamentId: string | null = null;

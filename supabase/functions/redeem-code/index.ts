@@ -27,6 +27,21 @@ Deno.serve(async (req) => {
   const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
   const admin = createClient(url, serviceKey);
 
+  // Block guest accounts from redeeming new codes.
+  // Note: unauthenticated callers (anon key) bypass the check — getUser returns
+  // no user. Only an actual signed-in guest hits the 403.
+  const authHeader = req.headers.get('authorization')?.replace(/^Bearer /, '') ?? '';
+  if (authHeader) {
+    const { data: u } = await admin.auth.getUser(authHeader);
+    if (u?.user) {
+      const { data: prof } = await admin.from('profiles')
+        .select('parent_user_id').eq('id', u.user.id).maybeSingle();
+      if (prof?.parent_user_id) {
+        return json({ ok: false, reason: 'guests_cannot_redeem' }, 403);
+      }
+    }
+  }
+
   // 1. Validate code
   const { data: codeRow, error: codeErr } = await admin
     .from('access_codes')
