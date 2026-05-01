@@ -1,5 +1,6 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.0';
 import { handleOptions, json } from '../_shared/cors.ts';
+import { assertActiveSession, SessionRevokedError } from '../_shared/assertActiveSession.ts';
 
 Deno.serve(async (req) => {
   const preflight = handleOptions(req);
@@ -43,6 +44,16 @@ Deno.serve(async (req) => {
   if (!sessionId && !joinCode) return json({ ok: false, reason: 'bad_request' }, 400);
 
   const admin = createClient(url, service);
+
+  const sessionIdHeader = req.headers.get('x-session-id');
+  try {
+    await assertActiveSession(admin, userId, sessionIdHeader);
+  } catch (e) {
+    if (e instanceof SessionRevokedError) {
+      return json({ ok: false, reason: 'session_revoked' }, 401);
+    }
+    throw e;
+  }
 
   const query = admin
     .from('game_sessions')

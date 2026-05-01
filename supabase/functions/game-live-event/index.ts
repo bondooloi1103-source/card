@@ -2,6 +2,7 @@ import { createClient, SupabaseClient } from 'https://esm.sh/@supabase/supabase-
 import { handleOptions, json } from '../_shared/cors.ts';
 import { buildRoundFromSeed } from '../_shared/seededRound.ts';
 import { figurePoolFor } from '../_shared/rosterGate.ts';
+import { assertActiveSession, SessionRevokedError } from '../_shared/assertActiveSession.ts';
 
 const PRESENCE_CHANNEL = (sid: string) => `game:session:${sid}`;
 
@@ -191,6 +192,16 @@ Deno.serve(async (req) => {
   if (!session_id || !event) return json({ ok: false, reason: 'bad_request' }, 400);
 
   const admin = createClient(url, service);
+
+  const sessionIdHeader = req.headers.get('x-session-id');
+  try {
+    await assertActiveSession(admin, userId, sessionIdHeader);
+  } catch (e) {
+    if (e instanceof SessionRevokedError) {
+      return json({ ok: false, reason: 'session_revoked' }, 401);
+    }
+    throw e;
+  }
 
   const { data: session, error: sErr } = await admin
     .from('game_sessions')

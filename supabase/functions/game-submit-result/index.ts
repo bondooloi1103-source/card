@@ -2,6 +2,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.0';
 import { handleOptions, json } from '../_shared/cors.ts';
 import { buildRoundFromSeed } from '../_shared/seededRound.ts';
 import { figurePoolFor } from '../_shared/rosterGate.ts';
+import { assertActiveSession, SessionRevokedError } from '../_shared/assertActiveSession.ts';
 
 interface IncomingAnswer {
   idx: number;
@@ -43,6 +44,16 @@ Deno.serve(async (req) => {
   }
 
   const admin = createClient(url, service);
+
+  const sessionIdHeader = req.headers.get('x-session-id');
+  try {
+    await assertActiveSession(admin, userId, sessionIdHeader);
+  } catch (e) {
+    if (e instanceof SessionRevokedError) {
+      return json({ ok: false, reason: 'session_revoked' }, 401);
+    }
+    throw e;
+  }
 
   const { data: session, error: sErr } = await admin
     .from('game_sessions')

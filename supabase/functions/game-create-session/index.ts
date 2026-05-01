@@ -1,6 +1,7 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.0';
 import { handleOptions, json } from '../_shared/cors.ts';
 import { QUOTE_FIG_IDS, MIN_FIGS_FOR_ROSTER } from '../_shared/rosterGate.ts';
+import { assertActiveSession, SessionRevokedError } from '../_shared/assertActiveSession.ts';
 
 const MODES = new Set(['solo', 'async_duel', 'live_room', 'tournament']);
 const LANGS = new Set(['mn', 'en']);
@@ -73,6 +74,16 @@ Deno.serve(async (req) => {
   }
 
   const admin = createClient(url, service);
+
+  const sessionId = req.headers.get('x-session-id');
+  try {
+    await assertActiveSession(admin, userId, sessionId);
+  } catch (e) {
+    if (e instanceof SessionRevokedError) {
+      return json({ ok: false, reason: 'session_revoked' }, 401);
+    }
+    throw e;
+  }
 
   // --- Seed resolution ---
   let seed = randSeed();
