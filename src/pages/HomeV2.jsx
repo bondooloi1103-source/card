@@ -11,9 +11,6 @@ import {
   Quote as QuoteIcon,
   ScanLine,
   Map as MapIcon,
-  BookOpen,
-  Shield,
-  Crown,
   Plus,
 } from 'lucide-react';
 import { useLang } from '@/lib/i18n';
@@ -22,6 +19,7 @@ import { useMyTeam } from '@/hooks/useMyTeam';
 import { base44 } from '@/api/base44Client';
 import ChatFAB from '@/components/ChatFAB';
 import Card3D from '@/components/Card3D';
+import FigureTileV2 from '@/components/FigureTileV2';
 
 const FONT_SANS =
   '"Inter Tight", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif';
@@ -516,122 +514,8 @@ function Hero({ c, figureCount }) {
   );
 }
 
-const PORTRAIT_FALLBACKS = {
-  khans: '#2A2218',
-  queens: '#2A1C1C',
-  warriors: '#2C2615',
-  political: '#1F1B14',
-  cultural: '#1A2024',
-  modern: '#221A1A',
-};
-
-function CategoryIcon({ cat, size = 14 }) {
-  if (cat === 'khans') return <Crown size={size} />;
-  if (cat === 'queens') return <Sparkles size={size} />;
-  if (cat === 'warriors') return <Shield size={size} />;
-  if (cat === 'political') return <BookOpen size={size} />;
-  return <BookOpen size={size} />;
-}
-
-function FigureTile({ figure, onClick }) {
-  const [hover, setHover] = useState(false);
-  const fallback = PORTRAIT_FALLBACKS[figure.cat] || tokens.surfaceMuted;
-  return (
-    <button
-      onClick={onClick}
-      onMouseEnter={() => setHover(true)}
-      onMouseLeave={() => setHover(false)}
-      style={{
-        position: 'relative',
-        background: tokens.surface,
-        border: `1px solid ${tokens.border}`,
-        borderRadius: 22,
-        overflow: 'hidden',
-        padding: 0,
-        cursor: 'pointer',
-        textAlign: 'left',
-        font: 'inherit',
-        color: 'inherit',
-        transition: 'transform 200ms ease, box-shadow 200ms ease',
-        transform: hover ? 'translateY(-3px)' : 'translateY(0)',
-        boxShadow: hover ? '0 24px 48px -28px rgba(15,23,42,0.22)' : 'none',
-      }}
-    >
-      <div
-        style={{
-          aspectRatio: '4/5',
-          position: 'relative',
-          overflow: 'hidden',
-          background: fallback,
-        }}
-      >
-        {figure.image_url ? (
-          <img
-            src={figure.image_url}
-            alt={figure.name}
-            style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
-            loading="lazy"
-          />
-        ) : (
-          <div
-            style={{
-              width: '100%',
-              height: '100%',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: 60,
-              opacity: 0.5,
-            }}
-          >
-            {figure.ico}
-          </div>
-        )}
-        <div
-          style={{
-            position: 'absolute',
-            top: 12,
-            left: 14,
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: 5,
-            padding: '4px 10px',
-            borderRadius: 9999,
-            background: 'rgba(10,12,20,0.72)',
-            color: tokens.brandOnSoft,
-            fontSize: 11,
-            fontWeight: 600,
-            letterSpacing: 0.4,
-            backdropFilter: 'blur(6px)',
-            border: `1px solid ${tokens.border}`,
-          }}
-        >
-          <CategoryIcon cat={figure.cat} size={11} />
-          {figure.cat}
-        </div>
-        <div
-          style={{
-            position: 'absolute',
-            left: 14,
-            right: 14,
-            bottom: 12,
-            color: '#fff',
-            background: 'linear-gradient(to top, rgba(0,0,0,0.65), rgba(0,0,0,0))',
-            paddingTop: 36,
-            paddingBottom: 4,
-          }}
-        >
-          <div style={{ fontWeight: 700, fontSize: 17, lineHeight: 1.15 }}>
-            {figure.name}
-          </div>
-          <div style={{ color: 'rgba(255,255,255,0.85)', fontSize: 12.5, marginTop: 4 }}>
-            {figure.yrs}
-          </div>
-        </div>
-      </div>
-    </button>
-  );
-}
+// FigureTile, PORTRAIT_FALLBACKS, and CategoryIcon now live in @/components/FigureTileV2
+// (re-exported for shared use across Figures and Collection pages).
 
 function MyTeamStrip({ c, figures }) {
   const { team, removeFromTeam } = useMyTeam();
@@ -710,8 +594,8 @@ function MyTeamStrip({ c, figures }) {
           >
             {teamFigures.map((figure, i) => (
               <Reveal key={figure.fig_id} delay={i * 60}>
-                <div style={{ width: 200, flexShrink: 0, scrollSnapAlign: 'start' }}>
-                  <FigureTile figure={figure} onClick={() => navigate(`/figure/${figure.fig_id}`)} />
+                <div style={{ width: 260, flexShrink: 0, scrollSnapAlign: 'start' }}>
+                  <FigureTileV2 figure={figure} onClick={() => navigate(`/figure/${figure.fig_id}`)} />
                 </div>
               </Reveal>
             ))}
@@ -845,9 +729,9 @@ function ExploreFigures({ c, figures }) {
           style={{
             display: 'grid',
             gridTemplateColumns: view3D
-              ? 'repeat(auto-fill, minmax(260px, 1fr))'
-              : 'repeat(auto-fill, minmax(200px, 1fr))',
-            gap: view3D ? 22 : 18,
+              ? 'repeat(auto-fill, minmax(280px, 1fr))'
+              : 'repeat(auto-fill, minmax(280px, 1fr))',
+            gap: 22,
           }}
         >
           {featured.map((f, i) => (
@@ -855,7 +739,7 @@ function ExploreFigures({ c, figures }) {
               {view3D ? (
                 <Card3D figure={f} onClick={() => navigate(`/figure/${f.fig_id}`)} index={i} />
               ) : (
-                <FigureTile figure={f} onClick={() => navigate(`/figure/${f.fig_id}`)} />
+                <FigureTileV2 figure={f} onClick={() => navigate(`/figure/${f.fig_id}`)} />
               )}
             </Reveal>
           ))}

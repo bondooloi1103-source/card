@@ -1,20 +1,55 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { FIGURES } from '@/lib/figuresData';
 import { useOwnedFigures } from '@/hooks/useOwnedFigures';
 import { currentSession } from '@/lib/authStore';
 import { supabase } from '@/lib/supabase';
+import { useLang } from '@/lib/i18n';
+import FigureTileV2, { FIGURE_TILE_TOKENS as t } from '@/components/FigureTileV2';
 
-const CATEGORIES = [
-  { id: 'all', label: 'Бүгд' },
-  { id: 'khans', label: 'Хаад' },
-  { id: 'queens', label: 'Хатад' },
-  { id: 'generals', label: 'Жанжид' },
-  { id: 'scholars', label: 'Эрдэмтэд' },
-];
+const FONT_SANS =
+  '"Inter Tight", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+
+const COPY = {
+  mn: {
+    back: 'Буцах',
+    title: 'Бүх дүрсүүд',
+    mine: 'Миний цуглуулга',
+    cats: {
+      all: 'Бүгд',
+      khans: 'Хаад',
+      queens: 'Хатад',
+      warriors: 'Жанжид',
+      political: 'Зөвлөх',
+      cultural: 'Соёл',
+      modern: 'Орчин үе',
+    },
+    claiming: 'Цуглуулж байна…',
+  },
+  en: {
+    back: 'Back',
+    title: 'All figures',
+    mine: 'My collection',
+    cats: {
+      all: 'All',
+      khans: 'Khans',
+      queens: 'Queens',
+      warriors: 'Warriors',
+      political: 'Advisors',
+      cultural: 'Culture',
+      modern: 'Modern',
+    },
+    claiming: 'Claiming…',
+  },
+};
+
+const CAT_ORDER = ['all', 'khans', 'queens', 'warriors', 'political', 'cultural', 'modern'];
 
 export default function Figures() {
   const navigate = useNavigate();
+  const { lang } = useLang();
+  const c = COPY[lang] || COPY.mn;
   const session = currentSession();
   const userId = session?.account_id ?? null;
   const { figIds } = useOwnedFigures(userId);
@@ -48,59 +83,170 @@ export default function Figures() {
   };
 
   return (
-    <div className="min-h-screen px-4 py-6" style={{ background: '#0a0c14', color: '#e8d5a3' }}>
-      <header className="max-w-5xl mx-auto mb-6">
-        <div className="flex items-center justify-between mb-4">
-          <h1 className="font-playfair text-2xl sm:text-3xl font-bold" style={{ color: '#c9a84c' }}>
-            Бүх дүрсүүд ({visible.length})
-          </h1>
-          <Link to="/collection" className="text-sm underline opacity-80 hover:opacity-100">
-            Миний цуглуулга →
+    <div
+      style={{
+        minHeight: '100vh',
+        background: t.bg,
+        color: t.ink,
+        fontFamily: FONT_SANS,
+        WebkitFontSmoothing: 'antialiased',
+      }}
+    >
+      <div style={{ maxWidth: 1280, margin: '0 auto', padding: '24px 24px 56px' }}>
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: 16,
+            marginBottom: 24,
+            flexWrap: 'wrap',
+          }}
+        >
+          <Link
+            to="/app"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 6,
+              color: t.body,
+              fontSize: 13.5,
+              fontWeight: 600,
+              textDecoration: 'none',
+              padding: '6px 12px',
+              borderRadius: 9999,
+              border: `1px solid ${t.border}`,
+              transition: 'color 160ms ease, border-color 160ms ease',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.color = t.brand;
+              e.currentTarget.style.borderColor = t.borderStrong;
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.color = t.body;
+              e.currentTarget.style.borderColor = t.border;
+            }}
+          >
+            <ArrowLeft size={14} /> {c.back}
+          </Link>
+          <Link
+            to="/collection"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 6,
+              color: t.brand,
+              fontWeight: 600,
+              fontSize: 14,
+              textDecoration: 'none',
+              borderBottom: `1px solid ${t.borderStrong}`,
+              paddingBottom: 4,
+            }}
+          >
+            {c.mine} <ArrowRight size={14} />
           </Link>
         </div>
-        <div className="flex flex-wrap gap-2">
-          {CATEGORIES.map((c) => (
-            <button
-              key={c.id}
-              onClick={() => setActiveCat(c.id)}
-              className="px-3 py-1 rounded-full text-sm transition-colors"
-              style={{
-                border: '1px solid rgba(201,168,76,0.4)',
-                background: activeCat === c.id ? 'rgba(201,168,76,0.2)' : 'transparent',
-              }}
-            >
-              {c.label}
-            </button>
-          ))}
-        </div>
-      </header>
 
-      <div className="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3">
-        {visible.map((f) => {
-          const owned = ownedSet.has(f.fig_id);
-          const claiming = claimingId === f.fig_id;
-          return (
-            <button
-              key={f.fig_id}
-              onClick={() => handleClaim(f)}
-              disabled={claiming}
-              className="text-left p-3 rounded transition-all"
-              style={{
-                border: owned ? '1.5px solid #c9a84c' : '1px solid rgba(201,168,76,0.25)',
-                background: owned ? 'rgba(201,168,76,0.08)' : 'rgba(26,18,0,0.4)',
-                opacity: claiming ? 0.5 : 1,
-              }}
-              aria-label={`${f.name}${owned ? ' (цуглуулагдсан)' : ''}`}
-            >
-              <div className="text-3xl mb-1">{f.ico}</div>
-              <div className="text-xs opacity-70">{f.card}</div>
-              <div className="font-bold mt-1 text-sm">{f.name}</div>
-              <div className="text-xs mt-2" style={{ color: owned ? '#c9a84c' : '#e8d5a380' }}>
-                {claiming ? 'Цуглуулж байна…' : owned ? '✓ Цуглуулсан' : '+ Авах'}
+        <header style={{ marginBottom: 32 }}>
+          <div
+            style={{
+              fontSize: 12,
+              fontWeight: 600,
+              color: t.brand,
+              letterSpacing: 1.6,
+              textTransform: 'uppercase',
+              marginBottom: 14,
+            }}
+          >
+            Codex · {visible.length} / {FIGURES.length}
+          </div>
+          <h1
+            style={{
+              fontSize: 'clamp(2rem, 4vw, 2.75rem)',
+              color: t.ink,
+              fontWeight: 800,
+              letterSpacing: -0.5,
+              lineHeight: 1.05,
+              margin: 0,
+            }}
+          >
+            {c.title}
+          </h1>
+        </header>
+
+        <div
+          style={{
+            display: 'flex',
+            gap: 8,
+            flexWrap: 'wrap',
+            marginBottom: 32,
+          }}
+        >
+          {CAT_ORDER.map((catId) => {
+            const active = activeCat === catId;
+            return (
+              <button
+                key={catId}
+                onClick={() => setActiveCat(catId)}
+                style={{
+                  padding: '8px 16px',
+                  borderRadius: 9999,
+                  background: active ? t.brand : 'transparent',
+                  color: active ? t.bg : t.body,
+                  border: `1px solid ${active ? t.brand : t.border}`,
+                  fontSize: 13,
+                  fontWeight: active ? 700 : 500,
+                  letterSpacing: 0.2,
+                  cursor: 'pointer',
+                  transition: 'all 160ms ease',
+                }}
+              >
+                {c.cats[catId]}
+              </button>
+            );
+          })}
+        </div>
+
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))',
+            gap: 22,
+          }}
+        >
+          {visible.map((f) => {
+            const claiming = claimingId === f.fig_id;
+            return (
+              <div key={f.fig_id} style={{ position: 'relative', opacity: claiming ? 0.55 : 1, transition: 'opacity 200ms' }}>
+                <FigureTileV2
+                  figure={f}
+                  owned={ownedSet.has(f.fig_id)}
+                  onClick={() => handleClaim(f)}
+                />
+                {claiming && (
+                  <div
+                    style={{
+                      position: 'absolute',
+                      inset: 0,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      pointerEvents: 'none',
+                      color: t.brand,
+                      fontSize: 13,
+                      fontWeight: 600,
+                      letterSpacing: 0.4,
+                      background: 'rgba(10,12,20,0.55)',
+                      borderRadius: 22,
+                    }}
+                  >
+                    {c.claiming}
+                  </div>
+                )}
               </div>
-            </button>
-          );
-        })}
+            );
+          })}
+        </div>
       </div>
     </div>
   );
